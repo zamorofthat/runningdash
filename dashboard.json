@@ -1,0 +1,1261 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "panels": [],
+      "title": "Debugging Your Running: Converting Data to Insight",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT COUNT(*) as total FROM runs",
+          "rawSql": "SELECT COUNT(*) as total FROM runs",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Runs",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
+          "unit": "lengthmi"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT SUM(distance_km) * 0.621371 as miles FROM runs",
+          "rawSql": "SELECT SUM(distance_km) * 0.621371 as miles FROM runs",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Miles",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 1 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT MIN(date) || ' to ' || MAX(date) as range FROM runs",
+          "rawSql": "SELECT MIN(date) || ' to ' || MAX(date) as range FROM runs",
+          "refId": "A"
+        }
+      ],
+      "title": "Date Range",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] },
+          "unit": "lengthmi"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT (SUM(distance_km) * 0.621371) / ((julianday(MAX(date)) - julianday(MIN(date))) / 7) as weekly_avg FROM runs",
+          "rawSql": "SELECT (SUM(distance_km) * 0.621371) / ((julianday(MAX(date)) - julianday(MIN(date))) / 7) as weekly_avg FROM runs",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Weekly Miles",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "yellow", "value": null }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT AVG(pace_min_km) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL",
+          "rawSql": "SELECT AVG(pace_min_km) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Pace (min/km)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "id": 101,
+      "panels": [],
+      "title": "Row 1: Was the Easy Run Actually Too Hard?",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Dots above the trendline = working harder than pace suggests",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "pointSize": { "fixed": 8 },
+            "scaleDistribution": { "type": "linear" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 8, "x": 0, "y": 6 },
+      "id": 10,
+      "options": {
+        "dims": { "x": "pace_min_km", "exclude": ["name", "date"] },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT pace_min_km, avg_hr, name, date FROM runs WHERE avg_hr IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY pace_min_km",
+          "rawSql": "SELECT pace_min_km, avg_hr, name, date FROM runs WHERE avg_hr IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY pace_min_km",
+          "refId": "A"
+        }
+      ],
+      "title": "Effort vs Pace (HR by Pace)",
+      "type": "xychart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Runs where relative effort was high despite moderate pace - cardiac drift = fatigue signal",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 8,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "always",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "relative_effort" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 8, "x": 8, "y": 6 },
+      "id": 11,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT date as time, relative_effort, avg_hr FROM runs WHERE relative_effort IS NOT NULL ORDER BY date",
+          "rawSql": "SELECT date as time, relative_effort, avg_hr FROM runs WHERE relative_effort IS NOT NULL ORDER BY date",
+          "refId": "A"
+        }
+      ],
+      "title": "HR Drift Detection (Effort over Time)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Most runs should be easy (relative effort < 50)",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 8, "x": 16, "y": 6 },
+      "id": 12,
+      "options": {
+        "bucketCount": 20,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT relative_effort FROM runs WHERE relative_effort IS NOT NULL",
+          "rawSql": "SELECT relative_effort FROM runs WHERE relative_effort IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Relative Effort Distribution",
+      "type": "histogram"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 16 },
+      "id": 102,
+      "panels": [],
+      "title": "Row 2: Did the Weather Wreck Me?",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Expect ~5 sec/km slower per 5C above 15C",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "pointSize": { "fixed": 8 },
+            "scaleDistribution": { "type": "linear" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 6, "x": 0, "y": 17 },
+      "id": 20,
+      "options": {
+        "dims": { "x": "temp_c", "exclude": ["name", "date"] },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT temp_c, pace_min_km, name, date FROM runs WHERE temp_c IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY temp_c",
+          "rawSql": "SELECT temp_c, pace_min_km, name, date FROM runs WHERE temp_c IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY temp_c",
+          "refId": "A"
+        }
+      ],
+      "title": "Temperature vs Pace",
+      "type": "xychart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Same pace, higher HR in heat",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "pointSize": { "fixed": 8 },
+            "scaleDistribution": { "type": "linear" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 6, "x": 6, "y": 17 },
+      "id": 21,
+      "options": {
+        "dims": { "x": "temp_c", "exclude": ["name", "date"] },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT temp_c, avg_hr, name, date FROM runs WHERE temp_c IS NOT NULL AND avg_hr IS NOT NULL ORDER BY temp_c",
+          "rawSql": "SELECT temp_c, avg_hr, name, date FROM runs WHERE temp_c IS NOT NULL AND avg_hr IS NOT NULL ORDER BY temp_c",
+          "refId": "A"
+        }
+      ],
+      "title": "Temperature vs HR",
+      "type": "xychart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "High humidity = slower runs",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "pointSize": { "fixed": 8 },
+            "scaleDistribution": { "type": "linear" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 6, "x": 12, "y": 17 },
+      "id": 22,
+      "options": {
+        "dims": { "x": "humidity", "exclude": ["name", "date"] },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT humidity, pace_min_km, name, date FROM runs WHERE humidity IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY humidity",
+          "rawSql": "SELECT humidity, pace_min_km, name, date FROM runs WHERE humidity IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY humidity",
+          "refId": "A"
+        }
+      ],
+      "title": "Humidity vs Pace",
+      "type": "xychart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Find the sweet spot zone for optimal running conditions",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "continuous-GrYlRd" },
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "scaleDistribution": { "type": "linear" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 6, "x": 18, "y": 17 },
+      "id": 23,
+      "options": {
+        "calculate": true,
+        "calculation": { "xBuckets": { "mode": "count", "value": "10" }, "yBuckets": { "mode": "count", "value": "10" } },
+        "cellGap": 1,
+        "cellValues": { "decimals": 2 },
+        "color": { "exponent": 0.5, "fill": "dark-orange", "mode": "scheme", "reverse": true, "scale": "exponential", "scheme": "RdYlGn", "steps": 64 },
+        "exemplars": { "color": "rgba(255,0,255,0.7)" },
+        "filterValues": { "le": 1e-9 },
+        "legend": { "show": true },
+        "rowsFrame": { "layout": "auto" },
+        "showValue": "never",
+        "tooltip": { "show": true, "yHistogram": false },
+        "yAxis": { "axisPlacement": "left", "reverse": false }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT temp_c as x, humidity as y, pace_min_km as value FROM runs WHERE temp_c IS NOT NULL AND humidity IS NOT NULL AND pace_min_km IS NOT NULL",
+          "rawSql": "SELECT temp_c as x, humidity as y, pace_min_km as value FROM runs WHERE temp_c IS NOT NULL AND humidity IS NOT NULL AND pace_min_km IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Weather Heatmap (Temp x Humidity)",
+      "type": "heatmap"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 },
+      "id": 103,
+      "panels": [],
+      "title": "Row 3: Did the Trail Just Suck?",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "More climbing = slower (but by how much?)",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "pointSize": { "fixed": 8 },
+            "scaleDistribution": { "type": "linear" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 28 },
+      "id": 30,
+      "options": {
+        "dims": { "x": "elevation_gain", "exclude": ["name", "date"] },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT elevation_gain, pace_min_km, name, date FROM runs WHERE elevation_gain IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY elevation_gain",
+          "rawSql": "SELECT elevation_gain, pace_min_km, name, date FROM runs WHERE elevation_gain IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY elevation_gain",
+          "refId": "A"
+        }
+      ],
+      "title": "Elevation Gain vs Pace",
+      "type": "xychart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Quantify the hill tax",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Avg Pace (min/km)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1,
+            "scaleDistribution": { "type": "linear" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 28 },
+      "id": 31,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "auto",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT CASE WHEN elevation_gain < 50 THEN 'Flat (<50m)' WHEN elevation_gain < 100 THEN 'Rolling (50-100m)' ELSE 'Hilly (>100m)' END as terrain, ROUND(AVG(pace_min_km), 2) as avg_pace FROM runs WHERE elevation_gain IS NOT NULL AND pace_min_km IS NOT NULL GROUP BY CASE WHEN elevation_gain < 50 THEN 1 WHEN elevation_gain < 100 THEN 2 ELSE 3 END ORDER BY 1",
+          "rawSql": "SELECT CASE WHEN elevation_gain < 50 THEN 'Flat (<50m)' WHEN elevation_gain < 100 THEN 'Rolling (50-100m)' ELSE 'Hilly (>100m)' END as terrain, ROUND(AVG(pace_min_km), 2) as avg_pace FROM runs WHERE elevation_gain IS NOT NULL AND pace_min_km IS NOT NULL GROUP BY CASE WHEN elevation_gain < 50 THEN 1 WHEN elevation_gain < 100 THEN 2 ELSE 3 END ORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Flat vs Hilly: The Hill Tax",
+      "type": "barchart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 38 },
+      "id": 104,
+      "panels": [],
+      "title": "Row 4: Was Sleep the Problem?",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Sleep <70 = noticeable degradation?",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "pointSize": { "fixed": 8 },
+            "scaleDistribution": { "type": "linear" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 6, "x": 0, "y": 39 },
+      "id": 40,
+      "options": {
+        "dims": { "x": "sleep_score", "exclude": ["name", "date"] },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT sleep_score, pace_min_km, name, date FROM run_with_sleep WHERE sleep_score IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY sleep_score",
+          "rawSql": "SELECT sleep_score, pace_min_km, name, date FROM run_with_sleep WHERE sleep_score IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY sleep_score",
+          "refId": "A"
+        }
+      ],
+      "title": "Sleep Score vs Pace",
+      "type": "xychart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Low HRV = same pace feels harder",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "pointSize": { "fixed": 8 },
+            "scaleDistribution": { "type": "linear" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 6, "x": 6, "y": 39 },
+      "id": 41,
+      "options": {
+        "dims": { "x": "hrv", "exclude": ["name", "date"] },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT hrv, relative_effort, name, date FROM run_with_sleep WHERE hrv IS NOT NULL AND relative_effort IS NOT NULL ORDER BY hrv",
+          "rawSql": "SELECT hrv, relative_effort, name, date FROM run_with_sleep WHERE hrv IS NOT NULL AND relative_effort IS NOT NULL ORDER BY hrv",
+          "refId": "A"
+        }
+      ],
+      "title": "HRV vs Relative Effort",
+      "type": "xychart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Trust the readiness score?",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "pointSize": { "fixed": 8 },
+            "scaleDistribution": { "type": "linear" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 6, "x": 12, "y": 39 },
+      "id": 42,
+      "options": {
+        "dims": { "x": "readiness_score", "exclude": ["name", "date"] },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT readiness_score, pace_min_km, name, date FROM run_with_sleep WHERE readiness_score IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY readiness_score",
+          "rawSql": "SELECT readiness_score, pace_min_km, name, date FROM run_with_sleep WHERE readiness_score IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY readiness_score",
+          "refId": "A"
+        }
+      ],
+      "title": "Readiness Score vs Pace",
+      "type": "xychart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Deep sleep = better recovery?",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "pointSize": { "fixed": 8 },
+            "scaleDistribution": { "type": "linear" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 6, "x": 18, "y": 39 },
+      "id": 43,
+      "options": {
+        "dims": { "x": "deep_sleep_min", "exclude": ["name", "date"] },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT deep_sleep_min, pace_min_km, name, date FROM run_with_sleep WHERE deep_sleep_min IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY deep_sleep_min",
+          "rawSql": "SELECT deep_sleep_min, pace_min_km, name, date FROM run_with_sleep WHERE deep_sleep_min IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY deep_sleep_min",
+          "refId": "A"
+        }
+      ],
+      "title": "Deep Sleep vs Pace",
+      "type": "xychart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 49 },
+      "id": 105,
+      "panels": [],
+      "title": "Row 5: The Big Picture",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Weekly mileage alongside avg sleep score - does overtraining tank sleep?",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "weekly_miles" },
+            "properties": [
+              { "id": "custom.axisPlacement", "value": "left" },
+              { "id": "unit", "value": "lengthmi" },
+              { "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "avg_sleep" },
+            "properties": [
+              { "id": "custom.axisPlacement", "value": "right" },
+              { "id": "color", "value": { "fixedColor": "purple", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 50 },
+      "id": 50,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT strftime('%Y-%W', date) as time, SUM(distance_km) * 0.621371 as weekly_miles FROM runs GROUP BY strftime('%Y-%W', date) ORDER BY time",
+          "rawSql": "SELECT strftime('%Y-%W', date) as time, SUM(distance_km) * 0.621371 as weekly_miles FROM runs GROUP BY strftime('%Y-%W', date) ORDER BY time",
+          "refId": "A"
+        },
+        {
+          "rawQueryText": "SELECT strftime('%Y-%W', date) as time, AVG(sleep_score) as avg_sleep FROM sleep WHERE sleep_score IS NOT NULL GROUP BY strftime('%Y-%W', date) ORDER BY time",
+          "rawSql": "SELECT strftime('%Y-%W', date) as time, AVG(sleep_score) as avg_sleep FROM sleep WHERE sleep_score IS NOT NULL GROUP BY strftime('%Y-%W', date) ORDER BY time",
+          "refId": "B"
+        }
+      ],
+      "title": "Training Load vs Sleep (Weekly)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Monthly average pace - getting faster or slower?",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Pace (min/km)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "always",
+            "spanNulls": true,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 50 },
+      "id": 51,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT strftime('%Y-%m', date) as time, AVG(pace_min_km) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL GROUP BY strftime('%Y-%m', date) ORDER BY time",
+          "rawSql": "SELECT strftime('%Y-%m', date) as time, AVG(pace_min_km) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL GROUP BY strftime('%Y-%m', date) ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "Monthly Pace Trend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Top 5 fastest and slowest runs with conditions",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "pace_min_km" },
+            "properties": [{ "id": "custom.width", "value": 100 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "date" },
+            "properties": [{ "id": "custom.width", "value": 100 }]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 60 },
+      "id": 52,
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT 'Fastest' as category, date, name, ROUND(pace_min_km, 2) as pace_min_km, ROUND(distance_km, 1) as distance_km, avg_hr, ROUND(temp_c, 1) as temp_c, weather FROM runs WHERE pace_min_km IS NOT NULL AND distance_km > 3 ORDER BY pace_min_km ASC LIMIT 5 UNION ALL SELECT 'Slowest' as category, date, name, ROUND(pace_min_km, 2) as pace_min_km, ROUND(distance_km, 1) as distance_km, avg_hr, ROUND(temp_c, 1) as temp_c, weather FROM runs WHERE pace_min_km IS NOT NULL AND distance_km > 3 ORDER BY pace_min_km DESC LIMIT 5",
+          "rawSql": "SELECT 'Fastest' as category, date, name, ROUND(pace_min_km, 2) as pace_min_km, ROUND(distance_km, 1) as distance_km, avg_hr, ROUND(temp_c, 1) as temp_c, weather FROM runs WHERE pace_min_km IS NOT NULL AND distance_km > 3 ORDER BY pace_min_km ASC LIMIT 5 UNION ALL SELECT 'Slowest' as category, date, name, ROUND(pace_min_km, 2) as pace_min_km, ROUND(distance_km, 1) as distance_km, avg_hr, ROUND(temp_c, 1) as temp_c, weather FROM runs WHERE pace_min_km IS NOT NULL AND distance_km > 3 ORDER BY pace_min_km DESC LIMIT 5",
+          "refId": "A"
+        }
+      ],
+      "title": "Best & Worst Runs",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 70 },
+      "id": 107,
+      "panels": [],
+      "title": "Row 6: Did I Fuel Properly?",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 71 },
+      "id": 70,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT COUNT(*) FROM runs WHERE gels_estimated IS NOT NULL",
+          "rawSql": "SELECT COUNT(*) FROM runs WHERE gels_estimated IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Long Runs (9+ mi)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "yellow", "value": null }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 71 },
+      "id": 71,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT SUM(gels_estimated) FROM runs WHERE gels_estimated IS NOT NULL",
+          "rawSql": "SELECT SUM(gels_estimated) FROM runs WHERE gels_estimated IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Gels Consumed",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "massg"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 71 },
+      "id": 72,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT SUM(carbs_g) FROM runs WHERE carbs_g IS NOT NULL",
+          "rawSql": "SELECT SUM(carbs_g) FROM runs WHERE carbs_g IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Carbs Consumed",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Protocol: 1 gel (30g carbs) every 3 miles starting at mile 3",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 71 },
+      "id": 73,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT AVG(carbs_g * 4.0 / calories * 100) FROM runs WHERE carbs_g IS NOT NULL AND calories > 0",
+          "rawSql": "SELECT AVG(carbs_g * 4.0 / calories * 100) FROM runs WHERE carbs_g IS NOT NULL AND calories > 0",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Carb Replacement %",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Carb intake vs calories burned on long runs",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1,
+            "scaleDistribution": { "type": "linear" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 71 },
+      "id": 74,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "orientation": "auto",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT CAST(ROUND(distance_km * 0.621371, 0) AS TEXT) || ' mi' as distance, ROUND(AVG(carbs_g * 4), 0) as carb_cals, ROUND(AVG(calories), 0) as burned FROM runs WHERE gels_estimated IS NOT NULL AND calories > 0 GROUP BY ROUND(distance_km * 0.621371, 0) ORDER BY ROUND(distance_km * 0.621371, 0)",
+          "rawSql": "SELECT CAST(ROUND(distance_km * 0.621371, 0) AS TEXT) || ' mi' as distance, ROUND(AVG(carbs_g * 4), 0) as carb_cals, ROUND(AVG(calories), 0) as burned FROM runs WHERE gels_estimated IS NOT NULL AND calories > 0 GROUP BY ROUND(distance_km * 0.621371, 0) ORDER BY ROUND(distance_km * 0.621371, 0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Carb Calories vs Total Burned",
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "All long runs with fueling estimates",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 75 },
+      "id": 75,
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT date, name, ROUND(distance_km * 0.621371, 1) as miles, gels_estimated as gels, carbs_g as carbs, calories as burned, ROUND(carbs_g * 4.0 / calories * 100, 1) as replace_pct, ROUND(pace_min_km, 2) as pace FROM runs WHERE gels_estimated IS NOT NULL ORDER BY date DESC",
+          "rawSql": "SELECT date, name, ROUND(distance_km * 0.621371, 1) as miles, gels_estimated as gels, carbs_g as carbs, calories as burned, ROUND(carbs_g * 4.0 / calories * 100, 1) as replace_pct, ROUND(pace_min_km, 2) as pace FROM runs WHERE gels_estimated IS NOT NULL ORDER BY date DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Long Run Fueling Log",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Does better fueling correlate with faster back-half paces?",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "pointSize": { "fixed": 10 },
+            "scaleDistribution": { "type": "linear" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 79 },
+      "id": 76,
+      "options": {
+        "dims": { "x": "gels", "exclude": ["name", "date"] },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT gels_estimated as gels, pace_min_km as pace, name, date FROM runs WHERE gels_estimated IS NOT NULL ORDER BY gels_estimated",
+          "rawSql": "SELECT gels_estimated as gels, pace_min_km as pace, name, date FROM runs WHERE gels_estimated IS NOT NULL ORDER BY gels_estimated",
+          "refId": "A"
+        }
+      ],
+      "title": "Gels vs Pace (Long Runs)",
+      "type": "xychart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 87 },
+      "id": 106,
+      "panels": [],
+      "title": "Row 7: Putting It All Together",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Find your ideal running conditions by sleep and temperature",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "continuous-GrYlRd" },
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "scaleDistribution": { "type": "linear" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 8, "x": 0, "y": 88 },
+      "id": 60,
+      "options": {
+        "calculate": true,
+        "calculation": { "xBuckets": { "mode": "count", "value": "8" }, "yBuckets": { "mode": "count", "value": "8" } },
+        "cellGap": 1,
+        "cellValues": { "decimals": 2 },
+        "color": { "exponent": 0.5, "fill": "dark-orange", "mode": "scheme", "reverse": true, "scale": "exponential", "scheme": "RdYlGn", "steps": 64 },
+        "exemplars": { "color": "rgba(255,0,255,0.7)" },
+        "filterValues": { "le": 1e-9 },
+        "legend": { "show": true },
+        "rowsFrame": { "layout": "auto" },
+        "showValue": "never",
+        "tooltip": { "show": true, "yHistogram": false },
+        "yAxis": { "axisLabel": "Sleep Score", "axisPlacement": "left", "reverse": false }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT temp_c as x, sleep_score as y, pace_min_km as value FROM run_with_sleep WHERE temp_c IS NOT NULL AND sleep_score IS NOT NULL AND pace_min_km IS NOT NULL",
+          "rawSql": "SELECT temp_c as x, sleep_score as y, pace_min_km as value FROM run_with_sleep WHERE temp_c IS NOT NULL AND sleep_score IS NOT NULL AND pace_min_km IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Optimal Conditions (Temp x Sleep)",
+      "type": "heatmap"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Never run hard on Monday?",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Avg Pace (min/km)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1,
+            "scaleDistribution": { "type": "linear" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 8, "x": 8, "y": 88 },
+      "id": 61,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "auto",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT day_of_week, ROUND(AVG(pace_min_km), 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL GROUP BY day_of_week ORDER BY CASE day_of_week WHEN 'Monday' THEN 1 WHEN 'Tuesday' THEN 2 WHEN 'Wednesday' THEN 3 WHEN 'Thursday' THEN 4 WHEN 'Friday' THEN 5 WHEN 'Saturday' THEN 6 WHEN 'Sunday' THEN 7 END",
+          "rawSql": "SELECT day_of_week, ROUND(AVG(pace_min_km), 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL GROUP BY day_of_week ORDER BY CASE day_of_week WHEN 'Monday' THEN 1 WHEN 'Tuesday' THEN 2 WHEN 'Wednesday' THEN 3 WHEN 'Thursday' THEN 4 WHEN 'Friday' THEN 5 WHEN 'Saturday' THEN 6 WHEN 'Sunday' THEN 7 END",
+          "refId": "A"
+        }
+      ],
+      "title": "Pace by Day of Week",
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Morning vs afternoon runner?",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Avg Pace (min/km)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1,
+            "scaleDistribution": { "type": "linear" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 8, "x": 16, "y": 88 },
+      "id": 62,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "auto",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT CASE WHEN hour_of_day < 6 THEN 'Early (0-6)' WHEN hour_of_day < 12 THEN 'Morning (6-12)' WHEN hour_of_day < 18 THEN 'Afternoon (12-18)' ELSE 'Evening (18-24)' END as time_of_day, ROUND(AVG(pace_min_km), 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL GROUP BY CASE WHEN hour_of_day < 6 THEN 1 WHEN hour_of_day < 12 THEN 2 WHEN hour_of_day < 18 THEN 3 ELSE 4 END ORDER BY 1",
+          "rawSql": "SELECT CASE WHEN hour_of_day < 6 THEN 'Early (0-6)' WHEN hour_of_day < 12 THEN 'Morning (6-12)' WHEN hour_of_day < 18 THEN 'Afternoon (12-18)' ELSE 'Evening (18-24)' END as time_of_day, ROUND(AVG(pace_min_km), 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL GROUP BY CASE WHEN hour_of_day < 6 THEN 1 WHEN hour_of_day < 12 THEN 2 WHEN hour_of_day < 18 THEN 3 ELSE 4 END ORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Pace by Time of Day",
+      "type": "barchart"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "tags": ["running", "health", "performance"],
+  "templating": { "list": [] },
+  "time": { "from": "2023-10-01T00:00:00.000Z", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Running Dashboard - Debug Your Body",
+  "uid": "running-debug",
+  "version": 1,
+  "weekStart": ""
+}
