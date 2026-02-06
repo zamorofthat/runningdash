@@ -20,11 +20,14 @@ Built a SQLite-backed Grafana dashboard for a conference talk: **"Debug the most
 | Source | Records | Date Range |
 |--------|---------|------------|
 | Strava runs | 339 | Oct 2023 - Feb 2026 |
+| Garmin runs | 197 | Dec 2024 - Feb 2026 |
 | Oura sleep | 488 | Sep 2024 - Mar 2026 |
 | Runs with sleep data | 203 | (joined) |
+| Runs with Garmin data | 200 | (matched by date/distance) |
 | Long runs (9+ mi) | 30 | (with fueling estimates) |
 
 **Total distance:** 2,329 km (1,448 miles)
+**Average VO2max:** 49.0
 
 ---
 
@@ -49,19 +52,44 @@ Built a SQLite-backed Grafana dashboard for a conference talk: **"Debug the most
 
 ### 2. The 80/20 Rule Analysis
 
-**Important: Easy zone is HR < 159** (user-specific threshold)
+**User's zones based on max HR 201:**
+- Easy = HR < 155 (~77% max HR)
+- Tempo/Hard = HR 155+
 
-#### All-Time Distribution
-| Zone | Runs | % |
-|------|------|---|
-| Easy (<159 HR) | 136 | 41.3% |
-| Tempo/Hard (159+) | 193 | 58.7% |
+#### By Average HR (User's Zones)
+| Period | Easy Runs | Hard Runs | Easy % | Target |
+|--------|-----------|-----------|--------|--------|
+| All-time | 83 | 246 | **25.2%** | 80% |
+| NYC Block | 13 | 32 | **28.9%** | 80% |
+| Tokyo Block | 10 | 29 | **25.6%** | 80% |
 
-Still not 80/20, but not as bad as initially calculated with wrong zones.
+Still running ~75% hard - the 80/20 is inverted.
+
+#### By Actual Time in Garmin HR Zones
+| Metric | Target | Actual |
+|--------|--------|--------|
+| Easy (Zone 1-2) | 80% | **9.9%** |
+| Hard (Zone 3-5) | 20% | **90.1%** |
+
+Garmin's zone-based analysis shows it's even worse - only 10% of actual running time is in easy zones.
 
 ---
 
 ### 3. NYC vs Tokyo Marathon Training Blocks
+
+#### By Avg HR (Easy < 155)
+| Block | Easy Runs | Hard Runs | Easy % | Target |
+|-------|-----------|-----------|--------|--------|
+| NYC | 13 | 32 | **28.9%** | 80% |
+| Tokyo | 10 | 29 | **25.6%** | 80% |
+
+#### By Actual Time in Garmin Zones
+| Block | Runs | Easy Time | Hard Time | Easy % | Target |
+|-------|------|-----------|-----------|--------|--------|
+| NYC | 45 | 329 min | 2,293 min | **12.5%** | 80% |
+| Tokyo | 39 | 255 min | 2,007 min | **11.3%** | 80% |
+
+Both blocks are ~11-12% easy by zone time - consistently running too hard.
 
 #### Weekly Structure
 | Block | Runs/Week | Hard/Week | Easy/Week |
@@ -71,22 +99,15 @@ Still not 80/20, but not as bad as initially calculated with wrong zones.
 
 **Key insight:** Tokyo block has 2 intentional interval/tempo runs per week.
 
-#### Zone Distribution
-| Block | Easy (<159) | Hard (159+) |
-|-------|-------------|-------------|
-| NYC | 48.9% | 51.1% |
-| Tokyo | 35.9% | 64.1% |
-
-**Why Tokyo looks "worse":** Intentional polarized training with 2 structured hard days per week.
-
 #### The Real Story
 | Metric | NYC | Tokyo | Better? |
 |--------|-----|-------|---------|
-| Easy pace | 5:85/km | **6:02/km** | Tokyo (slower = truly easy) |
+| Easy pace | 5:85/km | **6:02/km** | Tokyo (slower) |
 | Hard runs/week | 1.6 | 2.5 | Tokyo (intentional) |
 | Structure | ad hoc | planned | Tokyo |
+| Actual easy % (zones) | 12.5% | 11.3% | Neither |
 
-**Narrative:** "The dashboard said I was running harder for Tokyo. But that's intentional polarization - 2 hard days, the rest truly easy."
+**Narrative:** "I thought I was fixing the bug for Tokyo with intentional polarization. The Garmin data proves I'm still running 90% of my time in hard zones. Even my 'easy' runs aren't easy enough."
 
 ---
 
@@ -123,7 +144,28 @@ Still not 80/20, but not as bad as initially calculated with wrong zones.
 
 ---
 
-### 7. Fueling Analysis
+### 7. Garmin Metrics (New!)
+
+Data matched from Garmin to Strava runs by date and distance:
+
+| Field | Description | Sample Value |
+|-------|-------------|--------------|
+| aerobic_te | Aerobic Training Effect (0-5) | 3.6 |
+| anaerobic_te | Anaerobic Training Effect (0-5) | 0.2 |
+| training_load | Training load score | 80-300 |
+| vo2max | VO2max estimate | 49 |
+| avg_power | Running power (watts) | 378 |
+| avg_ground_contact_time | Ground contact (ms) | 264 |
+| avg_vertical_oscillation | Vertical bounce (cm) | 7.6 |
+| avg_stride_length | Stride length (cm) | 92 |
+| body_battery_change | Energy drain | -12 |
+| hr_zone_1-5_sec | Time in each HR zone | varies |
+
+**Key insight:** The HR zone time data allows calculating actual 80/20 distribution, not just average HR.
+
+---
+
+### 8. Fueling Analysis
 
 **Protocol:** 1 gel (30g carbs) every 3 miles, starting at mile 3
 
@@ -181,6 +223,15 @@ Still not 80/20, but not as bad as initially calculated with wrong zones.
 - Optimal Conditions heatmap (Temp × Sleep)
 - Pace by Day of Week
 - Pace by Time of Day
+
+### Row 8: Advanced Metrics (Garmin)
+- Real 80/20 Analysis (Pie Chart) - Actual time in easy vs hard zones
+- Training Effect Trend - Aerobic/anaerobic training effect over time
+- VO2max Trend - VO2max estimate over time
+- Running Dynamics - Ground contact, stride length, vertical oscillation, power
+- Body Battery Drain by Distance - Energy cost per run
+- Weekly Training Intensity - Stacked bar of easy vs hard hours per week
+- Stat panels: Runs with Garmin Data, Current VO2max, Avg Training Load, Easy Zone %
 
 ---
 

@@ -1245,6 +1245,444 @@
       ],
       "title": "Pace by Time of Day",
       "type": "barchart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 98 },
+      "id": 108,
+      "panels": [],
+      "title": "Row 8: Advanced Metrics (Garmin)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "The REAL 80/20 - actual time spent in easy vs hard zones based on Garmin HR zone data",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Easy (Zone 1-2)" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Hard (Zone 3-5)" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 6, "x": 0, "y": 99 },
+      "id": 80,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "pieType": "pie",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT 'Easy (Zone 1-2)' as zone, SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / 60.0 as minutes FROM runs WHERE garmin_id IS NOT NULL UNION ALL SELECT 'Hard (Zone 3-5)' as zone, SUM(COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) / 60.0 as minutes FROM runs WHERE garmin_id IS NOT NULL",
+          "rawSql": "SELECT 'Easy (Zone 1-2)' as zone, SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / 60.0 as minutes FROM runs WHERE garmin_id IS NOT NULL UNION ALL SELECT 'Hard (Zone 3-5)' as zone, SUM(COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) / 60.0 as minutes FROM runs WHERE garmin_id IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Real 80/20 Analysis (Zone Time)",
+      "type": "piechart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Aerobic and anaerobic training effect over time (0-5 scale)",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "always",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "max": 5,
+          "min": 0,
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "aerobic_te" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "anaerobic_te" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 6, "x": 6, "y": 99 },
+      "id": 81,
+      "options": {
+        "legend": { "calcs": ["mean"], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT date as time, aerobic_te, anaerobic_te FROM runs WHERE garmin_id IS NOT NULL AND aerobic_te IS NOT NULL ORDER BY date",
+          "rawSql": "SELECT date as time, aerobic_te, anaerobic_te FROM runs WHERE garmin_id IS NOT NULL AND aerobic_te IS NOT NULL ORDER BY date",
+          "refId": "A"
+        }
+      ],
+      "title": "Training Effect Trend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "VO2max estimate over time - higher is better",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "VO2max",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "always",
+            "spanNulls": true,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 6, "x": 12, "y": 99 },
+      "id": 82,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT date as time, vo2max FROM runs WHERE garmin_id IS NOT NULL AND vo2max IS NOT NULL ORDER BY date",
+          "rawSql": "SELECT date as time, vo2max FROM runs WHERE garmin_id IS NOT NULL AND vo2max IS NOT NULL ORDER BY date",
+          "refId": "A"
+        }
+      ],
+      "title": "VO2max Trend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Average running dynamics metrics from Garmin",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1,
+            "scaleDistribution": { "type": "linear" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 6, "x": 18, "y": 99 },
+      "id": 83,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT 'Ground Contact (ms)' as metric, ROUND(AVG(avg_ground_contact_time), 0) as value FROM runs WHERE avg_ground_contact_time IS NOT NULL UNION ALL SELECT 'Stride Length (cm)' as metric, ROUND(AVG(avg_stride_length), 1) as value FROM runs WHERE avg_stride_length IS NOT NULL UNION ALL SELECT 'Vertical Osc (cm)' as metric, ROUND(AVG(avg_vertical_oscillation), 1) as value FROM runs WHERE avg_vertical_oscillation IS NOT NULL UNION ALL SELECT 'Avg Power (W)' as metric, ROUND(AVG(avg_power), 0) as value FROM runs WHERE avg_power IS NOT NULL",
+          "rawSql": "SELECT 'Ground Contact (ms)' as metric, ROUND(AVG(avg_ground_contact_time), 0) as value FROM runs WHERE avg_ground_contact_time IS NOT NULL UNION ALL SELECT 'Stride Length (cm)' as metric, ROUND(AVG(avg_stride_length), 1) as value FROM runs WHERE avg_stride_length IS NOT NULL UNION ALL SELECT 'Vertical Osc (cm)' as metric, ROUND(AVG(avg_vertical_oscillation), 1) as value FROM runs WHERE avg_vertical_oscillation IS NOT NULL UNION ALL SELECT 'Avg Power (W)' as metric, ROUND(AVG(avg_power), 0) as value FROM runs WHERE avg_power IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Running Dynamics (Averages)",
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "How much energy each run drains from body battery",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "pointSize": { "fixed": 8 },
+            "scaleDistribution": { "type": "linear" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 8, "x": 0, "y": 109 },
+      "id": 84,
+      "options": {
+        "dims": { "x": "distance_km", "exclude": ["name", "date"] },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT distance_km, body_battery_change, name, date FROM runs WHERE body_battery_change IS NOT NULL ORDER BY distance_km",
+          "rawSql": "SELECT distance_km, body_battery_change, name, date FROM runs WHERE body_battery_change IS NOT NULL ORDER BY distance_km",
+          "refId": "A"
+        }
+      ],
+      "title": "Body Battery Drain by Distance",
+      "type": "xychart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Weekly training intensity distribution - how polarized is your training?",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Hours",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1,
+            "scaleDistribution": { "type": "linear" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "easy_hrs" },
+            "properties": [
+              { "id": "displayName", "value": "Easy (Z1-2)" },
+              { "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "hard_hrs" },
+            "properties": [
+              { "id": "displayName", "value": "Hard (Z3-5)" },
+              { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 8, "x": 8, "y": 109 },
+      "id": 85,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "normal",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xTickLabelRotation": -45,
+        "xTickLabelSpacing": 100
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT strftime('%Y-%W', date) as week, SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / 3600.0 as easy_hrs, SUM(COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) / 3600.0 as hard_hrs FROM runs WHERE garmin_id IS NOT NULL GROUP BY strftime('%Y-%W', date) ORDER BY week",
+          "rawSql": "SELECT strftime('%Y-%W', date) as week, SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / 3600.0 as easy_hrs, SUM(COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) / 3600.0 as hard_hrs FROM runs WHERE garmin_id IS NOT NULL GROUP BY strftime('%Y-%W', date) ORDER BY week",
+          "refId": "A"
+        }
+      ],
+      "title": "Weekly Training Intensity",
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Garmin run count with matched data",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 109 },
+      "id": 86,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT COUNT(*) FROM runs WHERE garmin_id IS NOT NULL",
+          "rawSql": "SELECT COUNT(*) FROM runs WHERE garmin_id IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Runs with Garmin Data",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Current VO2max estimate from Garmin",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red", "value": null },
+            { "color": "orange", "value": 40 },
+            { "color": "yellow", "value": 45 },
+            { "color": "green", "value": 50 },
+            { "color": "blue", "value": 55 }
+          ]},
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 109 },
+      "id": 87,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT vo2max FROM runs WHERE vo2max IS NOT NULL ORDER BY date DESC LIMIT 1",
+          "rawSql": "SELECT vo2max FROM runs WHERE vo2max IS NOT NULL ORDER BY date DESC LIMIT 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Current VO2max",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Average training load per run",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 114 },
+      "id": 88,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT AVG(training_load) FROM runs WHERE training_load IS NOT NULL",
+          "rawSql": "SELECT AVG(training_load) FROM runs WHERE training_load IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Training Load",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Percentage of running time in easy zones (should be 80%)",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red", "value": null },
+            { "color": "orange", "value": 50 },
+            { "color": "yellow", "value": 70 },
+            { "color": "green", "value": 80 }
+          ]},
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 114 },
+      "id": 89,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT 100.0 * SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0) + COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) FROM runs WHERE garmin_id IS NOT NULL",
+          "rawSql": "SELECT 100.0 * SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0) + COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) FROM runs WHERE garmin_id IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Easy Zone % (Target: 80%)",
+      "type": "stat"
     }
   ],
   "refresh": "",

@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 """
-Ingest Strava and Oura data into SQLite for running analysis dashboard.
+Ingest Strava, Garmin, and Oura data into SQLite for running analysis dashboard.
 
 Usage: python3 ingest.py /path/to/runningdata/
 
 The script expects:
 - export_*/activities.csv (Strava export)
+- */DI_CONNECT/DI-Connect-Fitness/*_summarizedActivities.json (Garmin export)
 - oura_*_trends.csv (Oura export)
 
 Safe to re-run - uses upsert logic to avoid duplicates.
 """
 
 import csv
+import json
 import sqlite3
 import sys
 import os
@@ -74,7 +76,76 @@ def create_schema(conn: sqlite3.Connection):
             calories INTEGER,
             -- Fueling estimates (1 gel = 30g carbs every 3 miles, starting at mile 3)
             gels_estimated INTEGER,
-            carbs_g INTEGER
+            carbs_g INTEGER,
+            -- Garmin metrics (matched by date/distance)
+            garmin_id INTEGER,
+            aerobic_te REAL,
+            anaerobic_te REAL,
+            training_load REAL,
+            vo2max REAL,
+            avg_power INTEGER,
+            avg_ground_contact_time REAL,
+            avg_vertical_oscillation REAL,
+            avg_stride_length REAL,
+            body_battery_change INTEGER,
+            hr_zone_1_sec INTEGER,
+            hr_zone_2_sec INTEGER,
+            hr_zone_3_sec INTEGER,
+            hr_zone_4_sec INTEGER,
+            hr_zone_5_sec INTEGER
+        );
+
+        CREATE TABLE IF NOT EXISTS garmin_runs (
+            id INTEGER PRIMARY KEY,
+            date DATE,
+            name TEXT,
+            distance_km REAL,
+            duration_sec INTEGER,
+            avg_hr INTEGER,
+            max_hr INTEGER,
+            min_hr INTEGER,
+            calories REAL,
+            elevation_gain REAL,
+            elevation_loss REAL,
+            avg_speed REAL,
+            max_speed REAL,
+            avg_cadence REAL,
+            max_cadence REAL,
+            steps INTEGER,
+            -- Training metrics
+            aerobic_te REAL,
+            anaerobic_te REAL,
+            training_load REAL,
+            vo2max REAL,
+            training_effect_label TEXT,
+            -- Running dynamics
+            avg_power INTEGER,
+            max_power INTEGER,
+            norm_power INTEGER,
+            avg_ground_contact_time REAL,
+            avg_vertical_oscillation REAL,
+            avg_vertical_ratio REAL,
+            avg_stride_length REAL,
+            -- HR zones (milliseconds)
+            hr_zone_0_ms INTEGER,
+            hr_zone_1_ms INTEGER,
+            hr_zone_2_ms INTEGER,
+            hr_zone_3_ms INTEGER,
+            hr_zone_4_ms INTEGER,
+            hr_zone_5_ms INTEGER,
+            -- Body metrics
+            body_battery_change INTEGER,
+            water_estimated REAL,
+            -- Temperature
+            min_temp REAL,
+            max_temp REAL,
+            -- Workout perception
+            workout_feel INTEGER,
+            workout_rpe INTEGER,
+            -- Location
+            location_name TEXT,
+            start_lat REAL,
+            start_lon REAL
         );
 
         CREATE TABLE IF NOT EXISTS sleep (
@@ -224,6 +295,200 @@ def ingest_strava(conn: sqlite3.Connection, data_dir: Path) -> int:
     return count
 
 
+def ingest_garmin(conn: sqlite3.Connection, data_dir: Path) -> int:
+    """Ingest Garmin activities, filtering for runs only."""
+    # Find the Garmin export folder (UUID-named folder with DI_CONNECT)
+    garmin_dirs = list(data_dir.glob("*/DI_CONNECT/DI-Connect-Fitness"))
+    if not garmin_dirs:
+        print("Warning: No Garmin export folder found")
+        return 0
+
+    # Find the summarizedActivities JSON file
+    json_files = list(garmin_dirs[0].glob("*_summarizedActivities.json"))
+    if not json_files:
+        print(f"Warning: No summarizedActivities.json found in {garmin_dirs[0]}")
+        return 0
+
+    with open(json_files[0], "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    activities = data[0].get("summarizedActivitiesExport", [])
+
+    count = 0
+    for activity in activities:
+        # Filter for running activities only
+        activity_type = activity.get("activityType", "")
+        if activity_type not in ("running", "treadmill_running"):
+            continue
+
+        # Parse timestamp
+        ts = activity.get("startTimeLocal") or activity.get("beginTimestamp")
+        if not ts:
+            continue
+
+        dt = datetime.fromtimestamp(ts / 1000)
+        date_iso = dt.strftime("%Y-%m-%d")
+
+        # Get activity ID
+        activity_id = activity.get("activityId")
+        if not activity_id:
+            continue
+
+        # Distance in centimeters -> km
+        distance_cm = activity.get("distance", 0)
+        distance_km = distance_cm / 100000 if distance_cm else None
+
+        # Duration in ms -> seconds
+        duration_ms = activity.get("duration", 0)
+        duration_sec = int(duration_ms / 1000) if duration_ms else None
+
+        # HR zone times (ms)
+        hr_zone_0 = activity.get("hrTimeInZone_0")
+        hr_zone_1 = activity.get("hrTimeInZone_1")
+        hr_zone_2 = activity.get("hrTimeInZone_2")
+        hr_zone_3 = activity.get("hrTimeInZone_3")
+        hr_zone_4 = activity.get("hrTimeInZone_4")
+        hr_zone_5 = activity.get("hrTimeInZone_5")
+
+        conn.execute("""
+            INSERT OR REPLACE INTO garmin_runs (
+                id, date, name, distance_km, duration_sec,
+                avg_hr, max_hr, min_hr, calories,
+                elevation_gain, elevation_loss, avg_speed, max_speed,
+                avg_cadence, max_cadence, steps,
+                aerobic_te, anaerobic_te, training_load, vo2max, training_effect_label,
+                avg_power, max_power, norm_power,
+                avg_ground_contact_time, avg_vertical_oscillation,
+                avg_vertical_ratio, avg_stride_length,
+                hr_zone_0_ms, hr_zone_1_ms, hr_zone_2_ms,
+                hr_zone_3_ms, hr_zone_4_ms, hr_zone_5_ms,
+                body_battery_change, water_estimated,
+                min_temp, max_temp,
+                workout_feel, workout_rpe,
+                location_name, start_lat, start_lon
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            activity_id,
+            date_iso,
+            activity.get("name"),
+            distance_km,
+            duration_sec,
+            activity.get("avgHr"),
+            activity.get("maxHr"),
+            activity.get("minHr"),
+            activity.get("calories"),
+            activity.get("elevationGain"),
+            activity.get("elevationLoss"),
+            activity.get("avgSpeed"),
+            activity.get("maxSpeed"),
+            activity.get("avgRunCadence"),
+            activity.get("maxRunCadence"),
+            activity.get("steps"),
+            activity.get("aerobicTrainingEffect"),
+            activity.get("anaerobicTrainingEffect"),
+            activity.get("activityTrainingLoad"),
+            activity.get("vO2MaxValue"),
+            activity.get("trainingEffectLabel"),
+            activity.get("avgPower"),
+            activity.get("maxPower"),
+            activity.get("normPower"),
+            activity.get("avgGroundContactTime"),
+            activity.get("avgVerticalOscillation"),
+            activity.get("avgVerticalRatio"),
+            activity.get("avgStrideLength"),
+            hr_zone_0,
+            hr_zone_1,
+            hr_zone_2,
+            hr_zone_3,
+            hr_zone_4,
+            hr_zone_5,
+            activity.get("differenceBodyBattery"),
+            activity.get("waterEstimated"),
+            activity.get("minTemperature"),
+            activity.get("maxTemperature"),
+            activity.get("workoutFeel"),
+            activity.get("workoutRpe"),
+            activity.get("locationName"),
+            activity.get("startLatitude"),
+            activity.get("startLongitude")
+        ))
+        count += 1
+
+    conn.commit()
+    return count
+
+
+def match_garmin_to_strava(conn: sqlite3.Connection) -> int:
+    """Match Garmin runs to Strava runs by date and distance, update with Garmin metrics."""
+    # Match runs within same date and distance within 5%
+    cursor = conn.execute("""
+        SELECT
+            r.id as strava_id,
+            g.id as garmin_id,
+            g.aerobic_te,
+            g.anaerobic_te,
+            g.training_load,
+            g.vo2max,
+            g.avg_power,
+            g.avg_ground_contact_time,
+            g.avg_vertical_oscillation,
+            g.avg_stride_length,
+            g.body_battery_change,
+            g.hr_zone_1_ms,
+            g.hr_zone_2_ms,
+            g.hr_zone_3_ms,
+            g.hr_zone_4_ms,
+            g.hr_zone_5_ms
+        FROM runs r
+        JOIN garmin_runs g ON r.date = g.date
+            AND ABS(r.distance_km - g.distance_km) < (r.distance_km * 0.05)
+        WHERE r.garmin_id IS NULL
+    """)
+
+    matches = cursor.fetchall()
+
+    for match in matches:
+        conn.execute("""
+            UPDATE runs SET
+                garmin_id = ?,
+                aerobic_te = ?,
+                anaerobic_te = ?,
+                training_load = ?,
+                vo2max = ?,
+                avg_power = ?,
+                avg_ground_contact_time = ?,
+                avg_vertical_oscillation = ?,
+                avg_stride_length = ?,
+                body_battery_change = ?,
+                hr_zone_1_sec = ? / 1000,
+                hr_zone_2_sec = ? / 1000,
+                hr_zone_3_sec = ? / 1000,
+                hr_zone_4_sec = ? / 1000,
+                hr_zone_5_sec = ? / 1000
+            WHERE id = ?
+        """, (
+            match[1],  # garmin_id
+            match[2],  # aerobic_te
+            match[3],  # anaerobic_te
+            match[4],  # training_load
+            match[5],  # vo2max
+            match[6],  # avg_power
+            match[7],  # avg_ground_contact_time
+            match[8],  # avg_vertical_oscillation
+            match[9],  # avg_stride_length
+            match[10], # body_battery_change
+            match[11], # hr_zone_1_ms
+            match[12], # hr_zone_2_ms
+            match[13], # hr_zone_3_ms
+            match[14], # hr_zone_4_ms
+            match[15], # hr_zone_5_ms
+            match[0]   # strava_id
+        ))
+
+    conn.commit()
+    return len(matches)
+
+
 def ingest_oura(conn: sqlite3.Connection, data_dir: Path) -> int:
     """Ingest Oura sleep/readiness data."""
     # Find the Oura file
@@ -299,6 +564,16 @@ def main():
     run_count = ingest_strava(conn, data_dir)
     print(f"  {run_count} runs loaded")
 
+    # Ingest Garmin
+    print("Ingesting Garmin runs...")
+    garmin_count = ingest_garmin(conn, data_dir)
+    print(f"  {garmin_count} runs loaded")
+
+    # Match Garmin to Strava
+    print("Matching Garmin metrics to Strava runs...")
+    match_count = match_garmin_to_strava(conn)
+    print(f"  {match_count} runs matched")
+
     # Ingest Oura
     print("Ingesting Oura sleep data...")
     sleep_count = ingest_oura(conn, data_dir)
@@ -323,6 +598,15 @@ def main():
     cur = conn.execute("SELECT COUNT(*), SUM(gels_estimated), SUM(carbs_g) FROM runs WHERE gels_estimated IS NOT NULL")
     long_runs, total_gels, total_carbs = cur.fetchone()
     print(f"  Long runs (9+ mi): {long_runs} ({total_gels} gels, {total_carbs}g carbs)")
+
+    cur = conn.execute("SELECT COUNT(*) FROM runs WHERE garmin_id IS NOT NULL")
+    garmin_matched = cur.fetchone()[0]
+    print(f"  Runs with Garmin data: {garmin_matched}")
+
+    cur = conn.execute("SELECT AVG(vo2max) FROM runs WHERE vo2max IS NOT NULL")
+    avg_vo2 = cur.fetchone()[0]
+    if avg_vo2:
+        print(f"  Average VO2max: {avg_vo2:.1f}")
 
     conn.close()
     print()

@@ -23,7 +23,7 @@ import sys
 from pathlib import Path
 
 DB_PATH = Path(__file__).parent / "running_dashboard.db"
-DEFAULT_TABLES = ["runs", "sleep", "run_with_sleep"]
+DEFAULT_TABLES = ["runs", "sleep", "run_with_sleep", "garmin_runs"]
 
 
 def get_connection():

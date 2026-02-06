@@ -98,7 +98,28 @@ Visual mockup of the Grafana dashboard layout.
 │  │░░▒▒▓▓████░░░░░░│      │  ▐███ 5.88  Fri           │                                 │
 │  └─────────────────┘ temp │  ▐███ 5.86  Sat           │                                 │
 │   green=fast, red=slow    │  ▐███ 5.93  Sun           │                                 │
-└───────────────────────────┴───────────────────────────┴─────────────────────────────────┘
+├───────────────────────────┴───────────────────────────┴─────────────────────────────────┤
+│  ROW 8: ADVANCED METRICS (GARMIN)                                                       │
+├──────────────────┬──────────────────┬──────────────────┬────────────────────────────────┤
+│ Real 80/20       │ Training Effect  │  VO2max Trend    │ Running Dynamics               │
+│   (Pie Chart)    │   Trend          │                  │                                │
+│   ┌────────┐     │  TE ▲     ·      │  VO2 ▲           │  Ground Contact │ 264 ms       │
+│   │ ██░░░░ │     │     │  · · ·     │      │    ╱──╲   │  Stride Length  │ 92 cm        │
+│   │ ██░░░░ │     │     │ · ·  ·  ·  │      │ ╱─╱    ╲  │  Vertical Osc   │ 7.6 cm       │
+│   │ ██████ │     │     └────────►   │      └───────►   │  Avg Power      │ 378 W        │
+│   └────────┘     │        date      │       date       │                                │
+│ ██ Easy (10%)    │  · Aerobic       │                  │                                │
+│ ░░ Hard (90%)    │  · Anaerobic     │                  │                                │
+├──────────────────┴──────────────────┴──────────────────┴────────────────────────────────┤
+│  Body Battery          │  Weekly Training Intensity    │  Stats                         │
+│  Drain by Distance     │  (Stacked Bar)                │  ┌──────────────────────────┐  │
+│                        │                               │  │ Runs w/ Garmin │   200   │  │
+│  drain ▲   ·  ·        │  hrs ▲ ████████  ░░░░        │  │ Current VO2max │   49    │  │
+│       │ ·  ·  · ·      │      │ ████████  ░░░░        │  │ Avg Load       │   156   │  │
+│       │  · ·  ·  ·     │      │ ████████  ░░░░        │  │ Easy Zone %    │  9.9%   │  │
+│       └──────────► km  │      └──────────► week       │  └──────────────────────────┘  │
+│                        │  ████ Easy (Z1-2) ░░ Hard    │   (Target: 80% easy)           │
+└────────────────────────┴───────────────────────────────┴────────────────────────────────┘
 ```
 
 ---
@@ -138,6 +159,16 @@ Visual mockup of the Grafana dashboard layout.
 | 7 | Optimal Conditions | Heatmap | Temp × Sleep score |
 | 7 | Pace by Day of Week | Bar Chart | Best/worst days |
 | 7 | Pace by Time of Day | Bar Chart | Morning vs evening |
+| 8 | Real 80/20 Analysis | Pie Chart | Actual time in easy vs hard zones |
+| 8 | Training Effect Trend | Time Series | Aerobic/anaerobic TE over time |
+| 8 | VO2max Trend | Time Series | VO2max progression |
+| 8 | Running Dynamics | Bar Chart | Ground contact, stride, osc, power |
+| 8 | Body Battery Drain | XY Scatter | Energy drain by distance |
+| 8 | Weekly Training Intensity | Stacked Bar | Easy vs hard hours per week |
+| 8 | Runs with Garmin Data | Stat | Count of matched runs |
+| 8 | Current VO2max | Stat | Latest VO2max estimate |
+| 8 | Avg Training Load | Stat | Average training load per run |
+| 8 | Easy Zone % | Stat | % time in easy zones (target: 80%) |
 
 ---
 

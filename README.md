@@ -18,6 +18,7 @@ This dashboard answers the question: **Why did that run suck?**
 | Source | Data | Key Fields |
 |--------|------|------------|
 | Strava | Running activities | pace, HR, distance, weather, elevation |
+| Garmin | Advanced metrics | training effect, VO2max, power, HR zones, running dynamics |
 | Oura | Sleep/recovery | sleep score, HRV, readiness |
 
 ## Quick Start
@@ -31,8 +32,9 @@ python3 ingest.py ~/Downloads/runningdata/
 The script expects this folder structure:
 ```
 runningdata/
-├── export_*/activities.csv    # Strava export
-└── oura_*_trends.csv          # Oura export
+├── export_*/activities.csv                                    # Strava export
+├── */DI_CONNECT/DI-Connect-Fitness/*_summarizedActivities.json  # Garmin export
+└── oura_*_trends.csv                                          # Oura export
 ```
 
 ### 2. Configure Grafana
@@ -148,6 +150,15 @@ run_with_sleep
 - **Optimal Conditions Matrix** - Sleep score × Temperature heatmap
 - **Pace by Day of Week** - Never run hard on Monday?
 - **Pace by Time of Day** - Morning vs afternoon runner?
+
+### Row 8: Advanced Metrics (Garmin)
+- **Real 80/20 Analysis** - Pie chart showing actual time in easy (Z1-2) vs hard (Z3-5) zones
+- **Training Effect Trend** - Aerobic and anaerobic training effect over time
+- **VO2max Trend** - VO2max estimate progression
+- **Running Dynamics** - Ground contact, stride length, vertical oscillation, power
+- **Body Battery Drain** - Energy cost by distance
+- **Weekly Training Intensity** - Stacked bar chart of easy vs hard hours per week
+- **Stats** - Runs with Garmin data, Current VO2max, Avg Training Load, Easy Zone %
 
 ## Re-ingestion
 
