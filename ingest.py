@@ -4,10 +4,67 @@ Ingest Strava, Garmin, and Oura data into SQLite for running analysis dashboard.
 
 Usage: python3 ingest.py /path/to/runningdata/
 
-The script expects:
+Data Flow
+=========
+
+    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+    │     Strava      │    │     Garmin      │    │      Oura       │
+    │  export_*/      │    │  */DI_CONNECT/  │    │  oura_*_trends  │
+    │  activities.csv │    │  *_summarized   │    │     .csv        │
+    │                 │    │  Activities.json│    │                 │
+    └────────┬────────┘    └────────┬────────┘    └────────┬────────┘
+             │                      │                      │
+             │ Runs: date, distance │ Runs: VO2max, power  │ Sleep: score,
+             │ pace, HR, weather,   │ training effect,     │ HRV, readiness,
+             │ relative effort      │ running dynamics     │ deep/REM sleep
+             │                      │                      │
+             └──────────────────────┼──────────────────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────┐
+                         │    ingest.py     │
+                         │                  │
+                         │ 1. Load Strava   │
+                         │ 2. Load Garmin   │
+                         │ 3. Match by date │
+                         │    + distance    │
+                         │ 4. Load Oura     │
+                         └────────┬─────────┘
+                                  │
+                                  ▼
+                         ┌──────────────────┐
+                         │    SQLite DB     │
+                         │                  │
+                         │ Tables:          │
+                         │  - runs          │
+                         │  - garmin_runs   │
+                         │  - sleep         │
+                         │                  │
+                         │ Views:           │
+                         │  - run_with_sleep│
+                         └──────────────────┘
+
+Expected Input Files
+====================
+
 - export_*/activities.csv (Strava export)
 - */DI_CONNECT/DI-Connect-Fitness/*_summarizedActivities.json (Garmin export)
 - oura_*_trends.csv (Oura export)
+
+Matching Logic
+==============
+
+Garmin runs are matched to Strava runs by:
+1. Same date
+2. Distance within 5% tolerance
+
+This allows enriching Strava runs with Garmin's advanced metrics (VO2max,
+training effect, running dynamics, HR zones) while keeping Strava as the
+source of truth for basic run data.
+
+Sleep data is joined via the run_with_sleep view:
+- Morning runs (before noon) use same-day sleep data
+- Afternoon/evening runs use previous night's sleep data
 
 Safe to re-run - uses upsert logic to avoid duplicates.
 """

@@ -22,7 +22,7 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
           "unit": "none"
         },
         "overrides": []
@@ -86,7 +86,7 @@
           "color": { "mode": "thresholds" },
           "decimals": 1,
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
           "unit": "lengthmi"
         },
         "overrides": []
@@ -118,7 +118,7 @@
           "color": { "mode": "thresholds" },
           "decimals": 1,
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "yellow", "value": null }] },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
           "unit": "none"
         },
         "overrides": []
@@ -187,10 +187,10 @@
     },
     {
       "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
-      "description": "Relative effort over time - higher values indicate harder perceived effort",
+      "description": "Relative effort over time - higher values indicate harder perceived effort (capped at 200)",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "orange", "mode": "fixed" },
           "custom": {
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
             "pointSize": { "fixed": 8 },
@@ -198,7 +198,15 @@
           },
           "mappings": []
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "relative_effort" },
+            "properties": [
+              { "id": "max", "value": 200 },
+              { "id": "min", "value": 0 }
+            ]
+          }
+        ]
       },
       "gridPos": { "h": 10, "w": 8, "x": 8, "y": 6 },
       "id": 11,
@@ -221,18 +229,18 @@
     },
     {
       "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
-      "description": "Most runs should be easy (relative effort < 50)",
+      "description": "Most runs should be easy (relative effort < 100). Green = easy, Red = hard",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "mode": "continuous-GrYlRd" },
           "custom": {
             "fillOpacity": 80,
-            "gradientMode": "none",
+            "gradientMode": "hue",
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
             "lineWidth": 1
           },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 100 }, { "color": "red", "value": 200 }] }
         },
         "overrides": []
       },
@@ -500,7 +508,7 @@
       "description": "Sleep <70 = noticeable degradation?",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "purple", "mode": "fixed" },
           "custom": {
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
             "pointSize": { "fixed": 8 },
@@ -534,7 +542,7 @@
       "description": "Low HRV = same pace feels harder",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "purple", "mode": "fixed" },
           "custom": {
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
             "pointSize": { "fixed": 8 },
@@ -568,7 +576,7 @@
       "description": "Trust the readiness score?",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "purple", "mode": "fixed" },
           "custom": {
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
             "pointSize": { "fixed": 8 },
@@ -602,7 +610,7 @@
       "description": "Deep sleep = better recovery?",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "purple", "mode": "fixed" },
           "custom": {
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
             "pointSize": { "fixed": 8 },
@@ -644,7 +652,7 @@
       "description": "Weekly mileage - tracking training volume",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "blue", "mode": "fixed" },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -659,7 +667,7 @@
             "thresholdsStyle": { "mode": "off" }
           },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
           "unit": "lengthmi"
         },
         "overrides": []
@@ -693,7 +701,7 @@
       "description": "Monthly average pace - getting faster or slower?",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "green", "mode": "fixed" },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -1216,7 +1224,7 @@
       "description": "Aerobic training effect over time (0-5 scale)",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "blue", "mode": "fixed" },
           "custom": {
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
             "pointSize": { "fixed": 8 },
@@ -1250,7 +1258,7 @@
       "description": "VO2max estimate over time - higher is better",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "green", "mode": "fixed" },
           "custom": {
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
             "pointSize": { "fixed": 8 },
