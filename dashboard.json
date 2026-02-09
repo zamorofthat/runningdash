@@ -224,7 +224,7 @@
           "refId": "A"
         }
       ],
-      "title": "Relative Effort Over Time",
+      "title": "System Stress Over Time",
       "type": "xychart"
     },
     {
@@ -258,7 +258,7 @@
           "refId": "A"
         }
       ],
-      "title": "Relative Effort Distribution",
+      "title": "Stress Distribution",
       "type": "histogram"
     },
     {
@@ -274,7 +274,7 @@
       "description": "Expect ~5 sec/km slower per 5C above 15C",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "orange", "mode": "fixed" },
           "custom": {
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
             "pointSize": { "fixed": 8 },
@@ -308,7 +308,7 @@
       "description": "Same pace, higher HR in heat",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "orange", "mode": "fixed" },
           "custom": {
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
             "pointSize": { "fixed": 8 },
@@ -342,7 +342,7 @@
       "description": "High humidity = slower runs",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "orange", "mode": "fixed" },
           "custom": {
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
             "pointSize": { "fixed": 8 },
@@ -376,7 +376,7 @@
       "description": "Find the sweet spot zone for optimal running conditions (color = pace)",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "orange", "mode": "fixed" },
           "custom": {
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
             "pointSize": { "fixed": 8 },
@@ -418,7 +418,7 @@
       "description": "More climbing = slower (but by how much?)",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "blue", "mode": "fixed" },
           "custom": {
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
             "pointSize": { "fixed": 8 },
@@ -452,7 +452,7 @@
       "description": "Quantify the hill tax",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "fixedColor": "blue", "mode": "fixed" },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -778,8 +778,8 @@
       },
       "targets": [
         {
-          "rawQueryText": "SELECT * FROM (SELECT 'Fastest' as category, date, name, ROUND(pace_min_km, 2) as pace_min_km, ROUND(distance_km, 1) as distance_km, avg_hr, ROUND(temp_c, 1) as temp_c, weather FROM runs WHERE pace_min_km IS NOT NULL AND distance_km > 3 AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY pace_min_km ASC LIMIT 5) UNION ALL SELECT * FROM (SELECT 'Slowest' as category, date, name, ROUND(pace_min_km, 2) as pace_min_km, ROUND(distance_km, 1) as distance_km, avg_hr, ROUND(temp_c, 1) as temp_c, weather FROM runs WHERE pace_min_km IS NOT NULL AND distance_km > 3 AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY pace_min_km DESC LIMIT 5)",
-          "rawSql": "SELECT * FROM (SELECT 'Fastest' as category, date, name, ROUND(pace_min_km, 2) as pace_min_km, ROUND(distance_km, 1) as distance_km, avg_hr, ROUND(temp_c, 1) as temp_c, weather FROM runs WHERE pace_min_km IS NOT NULL AND distance_km > 3 AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY pace_min_km ASC LIMIT 5) UNION ALL SELECT * FROM (SELECT 'Slowest' as category, date, name, ROUND(pace_min_km, 2) as pace_min_km, ROUND(distance_km, 1) as distance_km, avg_hr, ROUND(temp_c, 1) as temp_c, weather FROM runs WHERE pace_min_km IS NOT NULL AND distance_km > 3 AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY pace_min_km DESC LIMIT 5)",
+          "rawQueryText": "SELECT * FROM (SELECT 'Fastest' as category, r.date, r.name, ROUND(r.pace_min_km, 2) as pace_min_km, ROUND(r.distance_km, 1) as distance_km, r.avg_hr, ROUND(r.temp_c, 1) as temp_c, r.weather, s.sleep_score, ROUND(r.elevation_gain, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON date(r.date) = s.date OR date(r.date, '-1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= date($__from/1000, 'unixepoch') AND r.date <= date($__to/1000, 'unixepoch') ORDER BY r.pace_min_km ASC LIMIT 5) UNION ALL SELECT * FROM (SELECT 'Slowest' as category, r.date, r.name, ROUND(r.pace_min_km, 2) as pace_min_km, ROUND(r.distance_km, 1) as distance_km, r.avg_hr, ROUND(r.temp_c, 1) as temp_c, r.weather, s.sleep_score, ROUND(r.elevation_gain, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON date(r.date) = s.date OR date(r.date, '-1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= date($__from/1000, 'unixepoch') AND r.date <= date($__to/1000, 'unixepoch') ORDER BY r.pace_min_km DESC LIMIT 5)",
+          "rawSql": "SELECT * FROM (SELECT 'Fastest' as category, r.date, r.name, ROUND(r.pace_min_km, 2) as pace_min_km, ROUND(r.distance_km, 1) as distance_km, r.avg_hr, ROUND(r.temp_c, 1) as temp_c, r.weather, s.sleep_score, ROUND(r.elevation_gain, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON date(r.date) = s.date OR date(r.date, '-1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= date($__from/1000, 'unixepoch') AND r.date <= date($__to/1000, 'unixepoch') ORDER BY r.pace_min_km ASC LIMIT 5) UNION ALL SELECT * FROM (SELECT 'Slowest' as category, r.date, r.name, ROUND(r.pace_min_km, 2) as pace_min_km, ROUND(r.distance_km, 1) as distance_km, r.avg_hr, ROUND(r.temp_c, 1) as temp_c, r.weather, s.sleep_score, ROUND(r.elevation_gain, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON date(r.date) = s.date OR date(r.date, '-1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= date($__from/1000, 'unixepoch') AND r.date <= date($__to/1000, 'unixepoch') ORDER BY r.pace_min_km DESC LIMIT 5)",
           "refId": "A"
         }
       ],
@@ -1174,8 +1174,57 @@
       "type": "barchart"
     },
     {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "Which factors have the biggest impact on your pace? Positive = faster when factor is favorable",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": true,
+            "axisColorMode": "text",
+            "axisLabel": "Pace Impact (sec/km faster)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1,
+            "scaleDistribution": { "type": "linear" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 98 },
+      "id": 63,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT 'Cool Temp (<20C)' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE temp_c >= 20 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE temp_c < 20 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact UNION ALL SELECT 'Good Sleep (>75)' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE sleep_score <= 75 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE sleep_score > 75 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact UNION ALL SELECT 'Flat Route (<50m)' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE elevation_gain >= 50 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE elevation_gain < 50 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact UNION ALL SELECT 'Low Humidity (<70%)' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE humidity >= 70 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE humidity < 70 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact UNION ALL SELECT 'High HRV (>40)' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE hrv <= 40 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE hrv > 40 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact ORDER BY impact DESC",
+          "rawSql": "SELECT 'Cool Temp (<20C)' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE temp_c >= 20 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE temp_c < 20 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact UNION ALL SELECT 'Good Sleep (>75)' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE sleep_score <= 75 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE sleep_score > 75 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact UNION ALL SELECT 'Flat Route (<50m)' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE elevation_gain >= 50 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE elevation_gain < 50 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact UNION ALL SELECT 'Low Humidity (<70%)' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE humidity >= 70 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE humidity < 70 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact UNION ALL SELECT 'High HRV (>40)' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE hrv <= 40 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE hrv > 40 AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact ORDER BY impact DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "What Actually Matters (Pace Impact)",
+      "type": "barchart"
+    },
+    {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 98 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 108 },
       "id": 108,
       "panels": [],
       "title": "Row 8: Advanced Metrics (Garmin)",
@@ -1183,41 +1232,59 @@
     },
     {
       "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
-      "description": "The REAL 80/20 - actual time spent in easy vs hard zones based on Garmin HR zone data",
+      "description": "Monthly Easy Zone % trend - target is 80% (SLO line shown)",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
-          "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
-          "mappings": []
-        },
-        "overrides": [
-          {
-            "matcher": { "id": "byName", "options": "Easy (Zone 1-2)" },
-            "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Easy Zone %",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1,
+            "scaleDistribution": { "type": "linear" },
+            "thresholdsStyle": { "mode": "line" }
           },
-          {
-            "matcher": { "id": "byName", "options": "Hard (Zone 3-5)" },
-            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
-          }
-        ]
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red", "value": null },
+            { "color": "orange", "value": 50 },
+            { "color": "yellow", "value": 70 },
+            { "color": "green", "value": 80 }
+          ]},
+          "unit": "percent"
+        },
+        "overrides": []
       },
-      "gridPos": { "h": 10, "w": 6, "x": 0, "y": 99 },
+      "gridPos": { "h": 10, "w": 6, "x": 0, "y": 109 },
       "id": 80,
       "options": {
-        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
-        "pieType": "pie",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/^minutes$/", "values": true },
-        "tooltip": { "mode": "single", "sort": "none" }
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xTickLabelRotation": -45,
+        "xTickLabelSpacing": 100
       },
       "targets": [
         {
-          "rawQueryText": "SELECT 'Easy (Zone 1-2)' as zone, SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / 60.0 as minutes FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') UNION ALL SELECT 'Hard (Zone 3-5)' as zone, SUM(COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) / 60.0 as minutes FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')",
-          "rawSql": "SELECT 'Easy (Zone 1-2)' as zone, SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / 60.0 as minutes FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') UNION ALL SELECT 'Hard (Zone 3-5)' as zone, SUM(COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) / 60.0 as minutes FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')",
+          "rawQueryText": "SELECT strftime('%Y-%m', MIN(date)) as month, ROUND(100.0 * SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0) + COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)), 1) as easy_pct FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') GROUP BY strftime('%Y-%m', date) ORDER BY MIN(date)",
+          "rawSql": "SELECT strftime('%Y-%m', MIN(date)) as month, ROUND(100.0 * SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0) + COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)), 1) as easy_pct FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') GROUP BY strftime('%Y-%m', date) ORDER BY MIN(date)",
           "refId": "A"
         }
       ],
-      "title": "Real 80/20 Analysis (Zone Time)",
-      "type": "piechart"
+      "title": "80/20 Trend (Easy Zone %)",
+      "type": "barchart"
     },
     {
       "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
@@ -1234,7 +1301,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 10, "w": 6, "x": 6, "y": 99 },
+      "gridPos": { "h": 10, "w": 6, "x": 6, "y": 109 },
       "id": 81,
       "options": {
         "dims": { "x": "day_num", "exclude": ["name", "date"] },
@@ -1250,7 +1317,7 @@
           "refId": "A"
         }
       ],
-      "title": "Aerobic Training Effect",
+      "title": "Processing Efficiency Score",
       "type": "xychart"
     },
     {
@@ -1268,7 +1335,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 10, "w": 6, "x": 12, "y": 99 },
+      "gridPos": { "h": 10, "w": 6, "x": 12, "y": 109 },
       "id": 82,
       "options": {
         "dims": { "x": "day_num", "exclude": ["name", "date"] },
@@ -1284,7 +1351,7 @@
           "refId": "A"
         }
       ],
-      "title": "VO2max Trend",
+      "title": "System Capacity Trend (VO2max)",
       "type": "xychart"
     },
     {
@@ -1311,7 +1378,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 10, "w": 6, "x": 18, "y": 99 },
+      "gridPos": { "h": 10, "w": 6, "x": 18, "y": 109 },
       "id": 83,
       "options": {
         "barRadius": 0,
@@ -1332,7 +1399,7 @@
           "refId": "A"
         }
       ],
-      "title": "Running Dynamics (Averages)",
+      "title": "Runtime Performance Metrics",
       "type": "barchart"
     },
     {
@@ -1350,7 +1417,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 10, "w": 8, "x": 0, "y": 109 },
+      "gridPos": { "h": 10, "w": 8, "x": 0, "y": 119 },
       "id": 84,
       "options": {
         "dims": { "x": "distance_km", "exclude": ["name", "date"] },
@@ -1366,7 +1433,7 @@
           "refId": "A"
         }
       ],
-      "title": "Body Battery Drain by Distance",
+      "title": "Resource Depletion Under Load",
       "type": "xychart"
     },
     {
@@ -1408,7 +1475,7 @@
           }
         ]
       },
-      "gridPos": { "h": 10, "w": 8, "x": 8, "y": 109 },
+      "gridPos": { "h": 10, "w": 8, "x": 8, "y": 119 },
       "id": 85,
       "options": {
         "barRadius": 0,
@@ -1429,7 +1496,7 @@
           "refId": "A"
         }
       ],
-      "title": "Weekly Training Intensity",
+      "title": "Load Distribution by Zone",
       "type": "barchart"
     },
     {
@@ -1444,7 +1511,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 109 },
+      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 119 },
       "id": 86,
       "options": {
         "colorMode": "value",
@@ -1461,7 +1528,7 @@
           "refId": "A"
         }
       ],
-      "title": "Runs with Garmin Data",
+      "title": "Total System Logs",
       "type": "stat"
     },
     {
@@ -1483,7 +1550,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 109 },
+      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 119 },
       "id": 87,
       "options": {
         "colorMode": "value",
@@ -1500,7 +1567,7 @@
           "refId": "A"
         }
       ],
-      "title": "Current VO2max",
+      "title": "Max System Capacity",
       "type": "stat"
     },
     {
@@ -1516,7 +1583,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 114 },
+      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 124 },
       "id": 88,
       "options": {
         "colorMode": "value",
@@ -1533,7 +1600,7 @@
           "refId": "A"
         }
       ],
-      "title": "Avg Training Load",
+      "title": "Avg System Load",
       "type": "stat"
     },
     {
@@ -1554,7 +1621,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 114 },
+      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 124 },
       "id": 89,
       "options": {
         "colorMode": "value",
@@ -1571,7 +1638,7 @@
           "refId": "A"
         }
       ],
-      "title": "Easy Zone % (Target: 80%)",
+      "title": "Easy Zone % (SLO: 80%)",
       "type": "stat"
     }
   ],

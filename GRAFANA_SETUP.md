@@ -220,3 +220,62 @@ Top stats redistributed (4 panels × width 6 = 24 total):
 2. **SQLite + Heatmaps**: Heatmap panels don't recognize SQLite data format. Use scatter plots as alternative.
 
 3. **Time variables**: Must use `date($__from/1000, 'unixepoch')` format for SQLite date comparisons (converts milliseconds to Unix timestamp to date string).
+
+---
+
+## Dashboard Modifications (2026-02-08) - Golden Grot Refinements
+
+### Panel Title Renames — Infrastructure Language
+
+Reinforcing the "body as infrastructure" metaphor:
+
+| Original | New |
+|----------|-----|
+| Weekly Training Intensity | Load Distribution by Zone |
+| VO2max Trend | System Capacity Trend (VO2max) |
+| Current VO2max | Max System Capacity |
+| Avg Training Load | Avg System Load |
+| Running Dynamics (Averages) | Runtime Performance Metrics |
+| Aerobic Training Effect | Processing Efficiency Score |
+| Body Battery Drain by Distance | Resource Depletion Under Load |
+| Relative Effort Over Time | System Stress Over Time |
+| Relative Effort Distribution | Stress Distribution |
+| Runs with Garmin Data | Total System Logs |
+| Easy Zone % (Target: 80%) | Easy Zone % (SLO: 80%) |
+
+### Best & Worst Runs Table Enhancement
+
+Added sleep_score and elevation_gain columns to enable root-cause analysis:
+- Each row now reads like a post-incident review
+- Example: "bad sleep + hot + hilly = worst performance"
+
+### 80/20 Trend Chart
+
+Replaced the redundant 80/20 pie chart (Row 8) with a **monthly Easy Zone % trend** bar chart:
+- Shows whether training polarization is improving or degrading over time
+- Threshold line at 80% (the SLO target)
+- Color-coded: red <50%, orange 50-70%, yellow 70-80%, green >80%
+
+### Row 7: "What Actually Matters" Panel
+
+Added new synthesis panel showing pace impact of each variable:
+- Cool Temp (<20C)
+- Good Sleep (>75)
+- Flat Route (<50m)
+- Low Humidity (<70%)
+- High HRV (>40)
+
+Values show seconds per km faster when condition is favorable. This is the diagnostic conclusion — after checking everything in Rows 1-6, Row 7 tells you which factors matter most.
+
+### Color Scheme by Section
+
+| Row | Color | Meaning |
+|-----|-------|---------|
+| Row 1 (Effort) | Green/Orange | Effort metrics |
+| Row 2 (Weather) | Orange | Environmental factors |
+| Row 3 (Terrain) | Blue | Elevation/route analysis |
+| Row 4 (Sleep) | Purple | Pre-run system state |
+| Row 5 (Big Picture) | Blue/Green | Volume and performance |
+| Row 6 (Fuel) | Yellow/Orange | Resource provisioning |
+| Row 7 (Synthesis) | Multi-color | Pulling from all sections |
+| Row 8 (Advanced) | Blue | Garmin deep telemetry |
