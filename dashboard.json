@@ -1269,7 +1269,7 @@
         "barWidth": 0.6,
         "groupWidth": 0.7,
         "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
-        "orientation": "auto",
+        "orientation": "vertical",
         "showValue": "auto",
         "stacking": "none",
         "tooltip": { "mode": "single", "sort": "none" },
@@ -1640,6 +1640,208 @@
       ],
       "title": "Easy Zone % (SLO: 80%)",
       "type": "stat"
+    },
+    {
+      "collapsed": true,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 129 },
+      "id": 109,
+      "panels": [
+        {
+          "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+          "description": "Comparing January (no alcohol) vs other months - 3 years of Dry January data",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": true,
+                "axisColorMode": "text",
+                "axisLabel": "Pace Impact (sec/km faster)",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "lineWidth": 1,
+                "scaleDistribution": { "type": "linear" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "yellow", "value": null }] },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 130 },
+          "id": 110,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.6,
+            "groupWidth": 0.7,
+            "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+            "orientation": "horizontal",
+            "showValue": "always",
+            "stacking": "none",
+            "tooltip": { "mode": "single", "sort": "none" },
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "rawQueryText": "SELECT 'Dry January Effect' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) != '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) = '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact",
+              "rawSql": "SELECT 'Dry January Effect' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) != '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) = '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact",
+              "refId": "A"
+            }
+          ],
+          "title": "Was It The Beer?",
+          "type": "barchart"
+        },
+        {
+          "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+          "description": "Average pace by month - January highlighted",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Avg Pace (min/km)",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "lineWidth": 1,
+                "scaleDistribution": { "type": "linear" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "Jan" },
+                "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }]
+              }
+            ]
+          },
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 130 },
+          "id": 111,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.6,
+            "groupWidth": 0.7,
+            "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": { "mode": "single", "sort": "none" },
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "rawQueryText": "SELECT CASE strftime('%m', date) WHEN '01' THEN 'Jan' WHEN '02' THEN 'Feb' WHEN '03' THEN 'Mar' WHEN '04' THEN 'Apr' WHEN '05' THEN 'May' WHEN '06' THEN 'Jun' WHEN '07' THEN 'Jul' WHEN '08' THEN 'Aug' WHEN '09' THEN 'Sep' WHEN '10' THEN 'Oct' WHEN '11' THEN 'Nov' WHEN '12' THEN 'Dec' END as month, ROUND(AVG(pace_min_km), 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') GROUP BY strftime('%m', date) ORDER BY strftime('%m', date)",
+              "rawSql": "SELECT CASE strftime('%m', date) WHEN '01' THEN 'Jan' WHEN '02' THEN 'Feb' WHEN '03' THEN 'Mar' WHEN '04' THEN 'Apr' WHEN '05' THEN 'May' WHEN '06' THEN 'Jun' WHEN '07' THEN 'Jul' WHEN '08' THEN 'Aug' WHEN '09' THEN 'Sep' WHEN '10' THEN 'Oct' WHEN '11' THEN 'Nov' WHEN '12' THEN 'Dec' END as month, ROUND(AVG(pace_min_km), 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') GROUP BY strftime('%m', date) ORDER BY strftime('%m', date)",
+              "refId": "A"
+            }
+          ],
+          "title": "Pace by Month (January = Dry)",
+          "type": "barchart"
+        },
+        {
+          "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+          "description": "Sleep quality comparison - does no alcohol improve sleep?",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Avg Sleep Score",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "lineWidth": 1,
+                "scaleDistribution": { "type": "linear" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] }
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "January (Dry)" },
+                "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }]
+              }
+            ]
+          },
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 130 },
+          "id": 112,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.6,
+            "groupWidth": 0.7,
+            "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+            "orientation": "horizontal",
+            "showValue": "always",
+            "stacking": "none",
+            "tooltip": { "mode": "single", "sort": "none" },
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "rawQueryText": "SELECT 'January (Dry)' as period, ROUND(AVG(sleep_score), 1) as avg_sleep FROM sleep WHERE strftime('%m', date) = '01' AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') UNION ALL SELECT 'Other Months' as period, ROUND(AVG(sleep_score), 1) as avg_sleep FROM sleep WHERE strftime('%m', date) != '01' AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')",
+              "rawSql": "SELECT 'January (Dry)' as period, ROUND(AVG(sleep_score), 1) as avg_sleep FROM sleep WHERE strftime('%m', date) = '01' AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') UNION ALL SELECT 'Other Months' as period, ROUND(AVG(sleep_score), 1) as avg_sleep FROM sleep WHERE strftime('%m', date) != '01' AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')",
+              "refId": "A"
+            }
+          ],
+          "title": "Sleep: Dry vs Wet Months",
+          "type": "barchart"
+        },
+        {
+          "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+          "description": "Performance cost of alcohol - January (dry) vs other months",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "decimals": 2,
+              "mappings": [],
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 0.3 },
+                { "color": "orange", "value": 0.5 },
+                { "color": "red", "value": 1 }
+              ]},
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 138 },
+          "id": 113,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "rawQueryText": "SELECT ROUND(100.0 * ((SELECT AVG(pace_min_km) FROM runs WHERE strftime('%m', date) != '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km) FROM runs WHERE strftime('%m', date) = '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch'))) / (SELECT AVG(pace_min_km) FROM runs WHERE pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 2) as pct",
+              "rawSql": "SELECT ROUND(100.0 * ((SELECT AVG(pace_min_km) FROM runs WHERE strftime('%m', date) != '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km) FROM runs WHERE strftime('%m', date) = '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch'))) / (SELECT AVG(pace_min_km) FROM runs WHERE pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 2) as pct",
+              "refId": "A"
+            }
+          ],
+          "title": "🍺 Alcohol Impact %",
+          "type": "stat"
+        }
+      ],
+      "title": "🍺 Row 9: So... Was It The Beer?",
+      "type": "row"
     }
   ],
   "refresh": "",
