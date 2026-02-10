@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """
-Ingest Strava, Garmin, and Oura data into SQLite for running analysis dashboard.
+Ingest Strava, Garmin, and Oura data into SQLite or PostgreSQL for running analysis dashboard.
 
-Usage: python3 ingest.py /path/to/runningdata/
+Usage:
+  SQLite (local):     python3 ingest.py /path/to/runningdata/
+  PostgreSQL (cloud): python3 ingest.py /path/to/runningdata/ --postgres "postgresql://user:pass@host/db"
 
 Data Flow
 =========
@@ -69,6 +71,7 @@ Sleep data is joined via the run_with_sleep view:
 Safe to re-run - uses upsert logic to avoid duplicates.
 """
 
+import argparse
 import csv
 import json
 import sqlite3
@@ -79,6 +82,13 @@ from datetime import datetime
 from pathlib import Path
 
 DB_PATH = Path(__file__).parent / "running_dashboard.db"
+
+# PostgreSQL support (optional)
+try:
+    import psycopg2
+    HAS_PSYCOPG2 = True
+except ImportError:
+    HAS_PSYCOPG2 = False
 
 
 def parse_strava_date(date_str: str) -> tuple[str, int, str]:
@@ -135,7 +145,7 @@ def create_schema(conn: sqlite3.Connection):
             gels_estimated INTEGER,
             carbs_g INTEGER,
             -- Garmin metrics (matched by date/distance)
-            garmin_id INTEGER,
+            garmin_id BIGINT,
             aerobic_te REAL,
             anaerobic_te REAL,
             training_load REAL,
@@ -256,7 +266,155 @@ def create_schema(conn: sqlite3.Connection):
     """)
 
 
-def ingest_strava(conn: sqlite3.Connection, data_dir: Path) -> int:
+def create_schema_postgres(conn):
+    """Create PostgreSQL database tables and views."""
+    cur = conn.cursor()
+
+    cur.execute("DROP VIEW IF EXISTS run_with_sleep")
+    cur.execute("DROP TABLE IF EXISTS runs CASCADE")
+    cur.execute("DROP TABLE IF EXISTS sleep CASCADE")
+    cur.execute("DROP TABLE IF EXISTS garmin_runs CASCADE")
+
+    cur.execute("""
+        CREATE TABLE runs (
+            id BIGINT PRIMARY KEY,
+            date DATE,
+            name TEXT,
+            distance_km DOUBLE PRECISION,
+            duration_sec INTEGER,
+            pace_min_km DOUBLE PRECISION,
+            avg_hr INTEGER,
+            max_hr INTEGER,
+            elevation_gain DOUBLE PRECISION,
+            temp_c DOUBLE PRECISION,
+            humidity DOUBLE PRECISION,
+            weather TEXT,
+            relative_effort INTEGER,
+            hour_of_day INTEGER,
+            day_of_week TEXT,
+            calories INTEGER,
+            gels_estimated INTEGER,
+            carbs_g INTEGER,
+            garmin_id BIGINT,
+            aerobic_te DOUBLE PRECISION,
+            anaerobic_te DOUBLE PRECISION,
+            training_load DOUBLE PRECISION,
+            vo2max DOUBLE PRECISION,
+            avg_power INTEGER,
+            avg_ground_contact_time DOUBLE PRECISION,
+            avg_vertical_oscillation DOUBLE PRECISION,
+            avg_stride_length DOUBLE PRECISION,
+            body_battery_change INTEGER,
+            hr_zone_1_sec INTEGER,
+            hr_zone_2_sec INTEGER,
+            hr_zone_3_sec INTEGER,
+            hr_zone_4_sec INTEGER,
+            hr_zone_5_sec INTEGER
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE garmin_runs (
+            id BIGINT PRIMARY KEY,
+            date DATE,
+            name TEXT,
+            distance_km DOUBLE PRECISION,
+            duration_sec INTEGER,
+            avg_hr INTEGER,
+            max_hr INTEGER,
+            min_hr INTEGER,
+            calories DOUBLE PRECISION,
+            elevation_gain DOUBLE PRECISION,
+            elevation_loss DOUBLE PRECISION,
+            avg_speed DOUBLE PRECISION,
+            max_speed DOUBLE PRECISION,
+            avg_cadence DOUBLE PRECISION,
+            max_cadence DOUBLE PRECISION,
+            steps INTEGER,
+            aerobic_te DOUBLE PRECISION,
+            anaerobic_te DOUBLE PRECISION,
+            training_load DOUBLE PRECISION,
+            vo2max DOUBLE PRECISION,
+            training_effect_label TEXT,
+            avg_power INTEGER,
+            max_power INTEGER,
+            norm_power INTEGER,
+            avg_ground_contact_time DOUBLE PRECISION,
+            avg_vertical_oscillation DOUBLE PRECISION,
+            avg_vertical_ratio DOUBLE PRECISION,
+            avg_stride_length DOUBLE PRECISION,
+            hr_zone_0_ms INTEGER,
+            hr_zone_1_ms INTEGER,
+            hr_zone_2_ms INTEGER,
+            hr_zone_3_ms INTEGER,
+            hr_zone_4_ms INTEGER,
+            hr_zone_5_ms INTEGER,
+            body_battery_change INTEGER,
+            water_estimated DOUBLE PRECISION,
+            min_temp DOUBLE PRECISION,
+            max_temp DOUBLE PRECISION,
+            workout_feel INTEGER,
+            workout_rpe INTEGER,
+            location_name TEXT,
+            start_lat DOUBLE PRECISION,
+            start_lon DOUBLE PRECISION
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE sleep (
+            date DATE PRIMARY KEY,
+            sleep_score INTEGER,
+            readiness_score INTEGER,
+            hrv INTEGER,
+            resting_hr INTEGER,
+            deep_sleep_min INTEGER,
+            rem_sleep_min INTEGER,
+            total_sleep_min INTEGER
+        )
+    """)
+
+    cur.execute("""
+        CREATE VIEW run_with_sleep AS
+        SELECT
+            r.*,
+            COALESCE(
+                CASE WHEN r.hour_of_day < 12 THEN s_same.sleep_score END,
+                s_prev.sleep_score
+            ) as sleep_score,
+            COALESCE(
+                CASE WHEN r.hour_of_day < 12 THEN s_same.readiness_score END,
+                s_prev.readiness_score
+            ) as readiness_score,
+            COALESCE(
+                CASE WHEN r.hour_of_day < 12 THEN s_same.hrv END,
+                s_prev.hrv
+            ) as hrv,
+            COALESCE(
+                CASE WHEN r.hour_of_day < 12 THEN s_same.resting_hr END,
+                s_prev.resting_hr
+            ) as resting_hr,
+            COALESCE(
+                CASE WHEN r.hour_of_day < 12 THEN s_same.deep_sleep_min END,
+                s_prev.deep_sleep_min
+            ) as deep_sleep_min,
+            COALESCE(
+                CASE WHEN r.hour_of_day < 12 THEN s_same.rem_sleep_min END,
+                s_prev.rem_sleep_min
+            ) as rem_sleep_min,
+            COALESCE(
+                CASE WHEN r.hour_of_day < 12 THEN s_same.total_sleep_min END,
+                s_prev.total_sleep_min
+            ) as total_sleep_min
+        FROM runs r
+        LEFT JOIN sleep s_prev ON (r.date - INTERVAL '1 day')::DATE = s_prev.date
+        LEFT JOIN sleep s_same ON r.date = s_same.date
+    """)
+
+    conn.commit()
+
+
+def ingest_strava(conn, data_dir: Path, is_postgres: bool = False) -> int:
     """Ingest Strava activities, filtering for runs only."""
     # Find the Strava export folder
     strava_dirs = list(data_dir.glob("export_*"))
@@ -268,6 +426,9 @@ def ingest_strava(conn: sqlite3.Connection, data_dir: Path) -> int:
     if not activities_file.exists():
         print(f"Warning: {activities_file} not found")
         return 0
+
+    cur = conn.cursor() if is_postgres else conn
+    placeholder = "%s" if is_postgres else "?"
 
     count = 0
     with open(activities_file, "r", encoding="utf-8") as f:
@@ -318,15 +479,7 @@ def ingest_strava(conn: sqlite3.Connection, data_dir: Path) -> int:
                 gels_estimated = max(0, int((distance_miles - 3) // 3) + 1)
                 carbs_g = gels_estimated * 30
 
-            # Upsert the run
-            conn.execute("""
-                INSERT OR REPLACE INTO runs (
-                    id, date, name, distance_km, duration_sec, pace_min_km,
-                    avg_hr, max_hr, elevation_gain, temp_c, humidity,
-                    weather, relative_effort, hour_of_day, day_of_week,
-                    calories, gels_estimated, carbs_g
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
+            values = (
                 activity_id,
                 date_iso,
                 row.get("Activity Name"),
@@ -345,14 +498,43 @@ def ingest_strava(conn: sqlite3.Connection, data_dir: Path) -> int:
                 calories,
                 gels_estimated,
                 carbs_g
-            ))
+            )
+
+            if is_postgres:
+                cur.execute(f"""
+                    INSERT INTO runs (
+                        id, date, name, distance_km, duration_sec, pace_min_km,
+                        avg_hr, max_hr, elevation_gain, temp_c, humidity,
+                        weather, relative_effort, hour_of_day, day_of_week,
+                        calories, gels_estimated, carbs_g
+                    ) VALUES ({', '.join([placeholder] * 18)})
+                    ON CONFLICT (id) DO UPDATE SET
+                        date = EXCLUDED.date, name = EXCLUDED.name,
+                        distance_km = EXCLUDED.distance_km, duration_sec = EXCLUDED.duration_sec,
+                        pace_min_km = EXCLUDED.pace_min_km, avg_hr = EXCLUDED.avg_hr,
+                        max_hr = EXCLUDED.max_hr, elevation_gain = EXCLUDED.elevation_gain,
+                        temp_c = EXCLUDED.temp_c, humidity = EXCLUDED.humidity,
+                        weather = EXCLUDED.weather, relative_effort = EXCLUDED.relative_effort,
+                        hour_of_day = EXCLUDED.hour_of_day, day_of_week = EXCLUDED.day_of_week,
+                        calories = EXCLUDED.calories, gels_estimated = EXCLUDED.gels_estimated,
+                        carbs_g = EXCLUDED.carbs_g
+                """, values)
+            else:
+                cur.execute(f"""
+                    INSERT OR REPLACE INTO runs (
+                        id, date, name, distance_km, duration_sec, pace_min_km,
+                        avg_hr, max_hr, elevation_gain, temp_c, humidity,
+                        weather, relative_effort, hour_of_day, day_of_week,
+                        calories, gels_estimated, carbs_g
+                    ) VALUES ({', '.join([placeholder] * 18)})
+                """, values)
             count += 1
 
     conn.commit()
     return count
 
 
-def ingest_garmin(conn: sqlite3.Connection, data_dir: Path) -> int:
+def ingest_garmin(conn, data_dir: Path, is_postgres: bool = False) -> int:
     """Ingest Garmin activities, filtering for runs only."""
     # Find the Garmin export folder (UUID-named folder with DI_CONNECT)
     garmin_dirs = list(data_dir.glob("*/DI_CONNECT/DI-Connect-Fitness"))
@@ -407,24 +589,10 @@ def ingest_garmin(conn: sqlite3.Connection, data_dir: Path) -> int:
         hr_zone_4 = activity.get("hrTimeInZone_4")
         hr_zone_5 = activity.get("hrTimeInZone_5")
 
-        conn.execute("""
-            INSERT OR REPLACE INTO garmin_runs (
-                id, date, name, distance_km, duration_sec,
-                avg_hr, max_hr, min_hr, calories,
-                elevation_gain, elevation_loss, avg_speed, max_speed,
-                avg_cadence, max_cadence, steps,
-                aerobic_te, anaerobic_te, training_load, vo2max, training_effect_label,
-                avg_power, max_power, norm_power,
-                avg_ground_contact_time, avg_vertical_oscillation,
-                avg_vertical_ratio, avg_stride_length,
-                hr_zone_0_ms, hr_zone_1_ms, hr_zone_2_ms,
-                hr_zone_3_ms, hr_zone_4_ms, hr_zone_5_ms,
-                body_battery_change, water_estimated,
-                min_temp, max_temp,
-                workout_feel, workout_rpe,
-                location_name, start_lat, start_lon
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
+        cur = conn.cursor() if is_postgres else conn
+        placeholder = "%s" if is_postgres else "?"
+
+        values = (
             activity_id,
             date_iso,
             activity.get("name"),
@@ -468,17 +636,47 @@ def ingest_garmin(conn: sqlite3.Connection, data_dir: Path) -> int:
             activity.get("locationName"),
             activity.get("startLatitude"),
             activity.get("startLongitude")
-        ))
+        )
+
+        cols = """id, date, name, distance_km, duration_sec,
+                avg_hr, max_hr, min_hr, calories,
+                elevation_gain, elevation_loss, avg_speed, max_speed,
+                avg_cadence, max_cadence, steps,
+                aerobic_te, anaerobic_te, training_load, vo2max, training_effect_label,
+                avg_power, max_power, norm_power,
+                avg_ground_contact_time, avg_vertical_oscillation,
+                avg_vertical_ratio, avg_stride_length,
+                hr_zone_0_ms, hr_zone_1_ms, hr_zone_2_ms,
+                hr_zone_3_ms, hr_zone_4_ms, hr_zone_5_ms,
+                body_battery_change, water_estimated,
+                min_temp, max_temp,
+                workout_feel, workout_rpe,
+                location_name, start_lat, start_lon"""
+
+        if is_postgres:
+            cur.execute(f"""
+                INSERT INTO garmin_runs ({cols})
+                VALUES ({', '.join([placeholder] * 43)})
+                ON CONFLICT (id) DO NOTHING
+            """, values)
+        else:
+            cur.execute(f"""
+                INSERT OR REPLACE INTO garmin_runs ({cols})
+                VALUES ({', '.join([placeholder] * 43)})
+            """, values)
         count += 1
 
     conn.commit()
     return count
 
 
-def match_garmin_to_strava(conn: sqlite3.Connection) -> int:
+def match_garmin_to_strava(conn, is_postgres: bool = False) -> int:
     """Match Garmin runs to Strava runs by date and distance, update with Garmin metrics."""
+    cur = conn.cursor() if is_postgres else conn
+    placeholder = "%s" if is_postgres else "?"
+
     # Match runs within same date and distance within 5%
-    cursor = conn.execute("""
+    cur.execute("""
         SELECT
             r.id as strava_id,
             g.id as garmin_id,
@@ -502,28 +700,10 @@ def match_garmin_to_strava(conn: sqlite3.Connection) -> int:
         WHERE r.garmin_id IS NULL
     """)
 
-    matches = cursor.fetchall()
+    matches = cur.fetchall()
 
     for match in matches:
-        conn.execute("""
-            UPDATE runs SET
-                garmin_id = ?,
-                aerobic_te = ?,
-                anaerobic_te = ?,
-                training_load = ?,
-                vo2max = ?,
-                avg_power = ?,
-                avg_ground_contact_time = ?,
-                avg_vertical_oscillation = ?,
-                avg_stride_length = ?,
-                body_battery_change = ?,
-                hr_zone_1_sec = ? / 1000,
-                hr_zone_2_sec = ? / 1000,
-                hr_zone_3_sec = ? / 1000,
-                hr_zone_4_sec = ? / 1000,
-                hr_zone_5_sec = ? / 1000
-            WHERE id = ?
-        """, (
+        values = (
             match[1],  # garmin_id
             match[2],  # aerobic_te
             match[3],  # anaerobic_te
@@ -534,19 +714,38 @@ def match_garmin_to_strava(conn: sqlite3.Connection) -> int:
             match[8],  # avg_vertical_oscillation
             match[9],  # avg_stride_length
             match[10], # body_battery_change
-            match[11], # hr_zone_1_ms
-            match[12], # hr_zone_2_ms
-            match[13], # hr_zone_3_ms
-            match[14], # hr_zone_4_ms
-            match[15], # hr_zone_5_ms
+            match[11] // 1000 if match[11] else None,  # hr_zone_1_sec
+            match[12] // 1000 if match[12] else None,  # hr_zone_2_sec
+            match[13] // 1000 if match[13] else None,  # hr_zone_3_sec
+            match[14] // 1000 if match[14] else None,  # hr_zone_4_sec
+            match[15] // 1000 if match[15] else None,  # hr_zone_5_sec
             match[0]   # strava_id
-        ))
+        )
+        cur.execute(f"""
+            UPDATE runs SET
+                garmin_id = {placeholder},
+                aerobic_te = {placeholder},
+                anaerobic_te = {placeholder},
+                training_load = {placeholder},
+                vo2max = {placeholder},
+                avg_power = {placeholder},
+                avg_ground_contact_time = {placeholder},
+                avg_vertical_oscillation = {placeholder},
+                avg_stride_length = {placeholder},
+                body_battery_change = {placeholder},
+                hr_zone_1_sec = {placeholder},
+                hr_zone_2_sec = {placeholder},
+                hr_zone_3_sec = {placeholder},
+                hr_zone_4_sec = {placeholder},
+                hr_zone_5_sec = {placeholder}
+            WHERE id = {placeholder}
+        """, values)
 
     conn.commit()
     return len(matches)
 
 
-def ingest_oura(conn: sqlite3.Connection, data_dir: Path) -> int:
+def ingest_oura(conn, data_dir: Path, is_postgres: bool = False) -> int:
     """Ingest Oura sleep/readiness data."""
     # Find the Oura file
     oura_files = list(data_dir.glob("oura_*_trends.csv"))
@@ -575,12 +774,10 @@ def ingest_oura(conn: sqlite3.Connection, data_dir: Path) -> int:
             total_sleep_sec = safe_int(row.get("Total Sleep Duration"))
             total_sleep_min = total_sleep_sec // 60 if total_sleep_sec else None
 
-            conn.execute("""
-                INSERT OR REPLACE INTO sleep (
-                    date, sleep_score, readiness_score, hrv, resting_hr,
-                    deep_sleep_min, rem_sleep_min, total_sleep_min
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
+            cur = conn.cursor() if is_postgres else conn
+            placeholder = "%s" if is_postgres else "?"
+
+            values = (
                 date,
                 safe_int(row.get("Sleep Score")),
                 safe_int(row.get("Readiness Score")),
@@ -589,7 +786,30 @@ def ingest_oura(conn: sqlite3.Connection, data_dir: Path) -> int:
                 deep_sleep_min,
                 rem_sleep_min,
                 total_sleep_min
-            ))
+            )
+
+            if is_postgres:
+                cur.execute(f"""
+                    INSERT INTO sleep (
+                        date, sleep_score, readiness_score, hrv, resting_hr,
+                        deep_sleep_min, rem_sleep_min, total_sleep_min
+                    ) VALUES ({', '.join([placeholder] * 8)})
+                    ON CONFLICT (date) DO UPDATE SET
+                        sleep_score = EXCLUDED.sleep_score,
+                        readiness_score = EXCLUDED.readiness_score,
+                        hrv = EXCLUDED.hrv,
+                        resting_hr = EXCLUDED.resting_hr,
+                        deep_sleep_min = EXCLUDED.deep_sleep_min,
+                        rem_sleep_min = EXCLUDED.rem_sleep_min,
+                        total_sleep_min = EXCLUDED.total_sleep_min
+                """, values)
+            else:
+                cur.execute(f"""
+                    INSERT OR REPLACE INTO sleep (
+                        date, sleep_score, readiness_score, hrv, resting_hr,
+                        deep_sleep_min, rem_sleep_min, total_sleep_min
+                    ) VALUES ({', '.join([placeholder] * 8)})
+                """, values)
             count += 1
 
     conn.commit()
@@ -597,70 +817,91 @@ def ingest_oura(conn: sqlite3.Connection, data_dir: Path) -> int:
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python3 ingest.py /path/to/runningdata/")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Ingest Strava, Garmin, and Oura data into SQLite or PostgreSQL"
+    )
+    parser.add_argument("data_dir", help="Path to runningdata directory")
+    parser.add_argument(
+        "--postgres",
+        metavar="URL",
+        help="PostgreSQL connection URL (e.g., postgresql://user:pass@host/db)"
+    )
+    args = parser.parse_args()
 
-    data_dir = Path(sys.argv[1])
+    data_dir = Path(args.data_dir)
     if not data_dir.exists():
         print(f"Error: Directory not found: {data_dir}")
         sys.exit(1)
 
-    print(f"Database: {DB_PATH}")
+    is_postgres = args.postgres is not None
+
+    if is_postgres:
+        if not HAS_PSYCOPG2:
+            print("Error: psycopg2 not installed. Run: pip install psycopg2-binary")
+            sys.exit(1)
+        print(f"Database: PostgreSQL")
+        conn = psycopg2.connect(args.postgres)
+    else:
+        print(f"Database: {DB_PATH}")
+        conn = sqlite3.connect(DB_PATH)
+
     print(f"Data source: {data_dir}")
     print()
 
-    conn = sqlite3.connect(DB_PATH)
-
     # Create schema
     print("Creating schema...")
-    create_schema(conn)
+    if is_postgres:
+        create_schema_postgres(conn)
+    else:
+        create_schema(conn)
 
     # Ingest Strava
     print("Ingesting Strava runs...")
-    run_count = ingest_strava(conn, data_dir)
+    run_count = ingest_strava(conn, data_dir, is_postgres)
     print(f"  {run_count} runs loaded")
 
     # Ingest Garmin
     print("Ingesting Garmin runs...")
-    garmin_count = ingest_garmin(conn, data_dir)
+    garmin_count = ingest_garmin(conn, data_dir, is_postgres)
     print(f"  {garmin_count} runs loaded")
 
     # Match Garmin to Strava
     print("Matching Garmin metrics to Strava runs...")
-    match_count = match_garmin_to_strava(conn)
+    match_count = match_garmin_to_strava(conn, is_postgres)
     print(f"  {match_count} runs matched")
 
     # Ingest Oura
     print("Ingesting Oura sleep data...")
-    sleep_count = ingest_oura(conn, data_dir)
+    sleep_count = ingest_oura(conn, data_dir, is_postgres)
     print(f"  {sleep_count} sleep records loaded")
 
     # Summary stats
     print()
     print("Summary:")
 
-    cur = conn.execute("SELECT MIN(date), MAX(date) FROM runs")
+    cur = conn.cursor() if is_postgres else conn
+    cur.execute("SELECT MIN(date), MAX(date) FROM runs")
     min_date, max_date = cur.fetchone()
     print(f"  Run date range: {min_date} to {max_date}")
 
-    cur = conn.execute("SELECT SUM(distance_km) FROM runs")
+    cur.execute("SELECT SUM(distance_km) FROM runs")
     total_km = cur.fetchone()[0]
-    print(f"  Total distance: {total_km:.1f} km ({total_km * 0.621371:.1f} miles)")
+    if total_km:
+        print(f"  Total distance: {total_km:.1f} km ({total_km * 0.621371:.1f} miles)")
 
-    cur = conn.execute("SELECT COUNT(*) FROM run_with_sleep WHERE sleep_score IS NOT NULL")
+    cur.execute("SELECT COUNT(*) FROM run_with_sleep WHERE sleep_score IS NOT NULL")
     joined = cur.fetchone()[0]
     print(f"  Runs with sleep data: {joined}")
 
-    cur = conn.execute("SELECT COUNT(*), SUM(gels_estimated), SUM(carbs_g) FROM runs WHERE gels_estimated IS NOT NULL")
+    cur.execute("SELECT COUNT(*), SUM(gels_estimated), SUM(carbs_g) FROM runs WHERE gels_estimated IS NOT NULL")
     long_runs, total_gels, total_carbs = cur.fetchone()
-    print(f"  Long runs (9+ mi): {long_runs} ({total_gels} gels, {total_carbs}g carbs)")
+    print(f"  Long runs (9+ mi): {long_runs} ({total_gels or 0} gels, {total_carbs or 0}g carbs)")
 
-    cur = conn.execute("SELECT COUNT(*) FROM runs WHERE garmin_id IS NOT NULL")
+    cur.execute("SELECT COUNT(*) FROM runs WHERE garmin_id IS NOT NULL")
     garmin_matched = cur.fetchone()[0]
     print(f"  Runs with Garmin data: {garmin_matched}")
 
-    cur = conn.execute("SELECT AVG(vo2max) FROM runs WHERE vo2max IS NOT NULL")
+    cur.execute("SELECT AVG(vo2max) FROM runs WHERE vo2max IS NOT NULL")
     avg_vo2 = cur.fetchone()[0]
     if avg_vo2:
         print(f"  Average VO2max: {avg_vo2:.1f}")

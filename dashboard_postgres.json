@@ -1,0 +1,3865 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_POSTGRES",
+      "label": "PostgreSQL",
+      "description": "PostgreSQL datasource for running data",
+      "type": "datasource",
+      "pluginId": "grafana-postgresql-datasource",
+      "pluginName": "PostgreSQL"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "10.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "grafana-postgresql-datasource",
+      "name": "PostgreSQL",
+      "version": "1.0.0"
+    }
+  ],
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 100,
+      "panels": [],
+      "title": "Debugging Your Running: Converting Data to Insight",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 18,
+        "x": 0,
+        "y": 1
+      },
+      "id": 114,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "### \ud83c\udfc3 Debug Your Body\n\nThis dashboard treats the human body like a production system. Each row eliminates a variable \u2014 **effort, weather, terrain, sleep, fueling** \u2014 until you find the root cause of a bad run. It's the same troubleshooting methodology used on production systems, applied to the only system you can't replace.\n\n**Data sources:** Strava (routes, pace) \u2022 Garmin (HR zones, VO2max, running dynamics) \u2022 Oura (sleep, HRV, readiness)",
+        "mode": "markdown"
+      },
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "\u26a0\ufe0f SLO VIOLATION - Target is 80% easy runs",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 50
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "id": 115,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT 100.0 * SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0) + COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "rawSql": "SELECT 100.0 * SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0) + COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Easy% (SLO: 80%)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 5
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT COUNT(*) as total FROM runs WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "rawSql": "SELECT COUNT(*) as total FROM runs WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Total Runs",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "lengthmi"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 4
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT SUM(distance_km) * 0.621371 as miles FROM runs WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "rawSql": "SELECT SUM(distance_km) * 0.621371 as miles FROM runs WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Total Miles",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "lengthmi"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 4
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT (SUM(distance_km) * 0.621371) / (((MAX(date) - MIN(date))) / 7) as weekly_avg FROM runs WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "rawSql": "SELECT (SUM(distance_km) * 0.621371) / (((MAX(date) - MIN(date))) / 7) as weekly_avg FROM runs WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Avg Weekly Miles",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 4
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT AVG(pace_min_km) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "rawSql": "SELECT AVG(pace_min_km) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Avg Pace (min/km)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 101,
+      "panels": [],
+      "title": "Row 1: Was the Easy Run Actually Too Hard?",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Dots above the trendline = working harder than pace suggests",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 8
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 0,
+        "y": 6
+      },
+      "id": 10,
+      "options": {
+        "dims": {
+          "x": "pace_min_km",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT pace_min_km, avg_hr, name, date FROM runs WHERE avg_hr IS NOT NULL AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY pace_min_km",
+          "rawSql": "SELECT pace_min_km, avg_hr, name, date FROM runs WHERE avg_hr IS NOT NULL AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY pace_min_km",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Effort vs Pace (HR by Pace)",
+      "type": "xychart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Relative effort over time - higher values indicate harder perceived effort (capped at 200)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 8
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "relative_effort"
+            },
+            "properties": [
+              {
+                "id": "max",
+                "value": 200
+              },
+              {
+                "id": "min",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 8,
+        "y": 6
+      },
+      "id": 11,
+      "options": {
+        "dims": {
+          "x": "time",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT (EXTRACT(EPOCH FROM date)::BIGINT * 1000) as time, relative_effort, name, date FROM runs WHERE relative_effort IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY date",
+          "rawSql": "SELECT (EXTRACT(EPOCH FROM date)::BIGINT * 1000) as time, relative_effort, name, date FROM runs WHERE relative_effort IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY date",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "System Stress Over Time",
+      "type": "xychart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Most runs should be easy (relative effort < 100). Green = easy, Red = hard",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "custom": {
+            "fillOpacity": 80,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 100
+              },
+              {
+                "color": "red",
+                "value": 200
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
+      "id": 12,
+      "options": {
+        "bucketCount": 20,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT relative_effort FROM runs WHERE relative_effort IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "rawSql": "SELECT relative_effort FROM runs WHERE relative_effort IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Stress Distribution",
+      "type": "histogram"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 102,
+      "panels": [],
+      "title": "Row 2: Did the Weather Wreck Me?",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Expect ~5 sec/km slower per 5C above 15C",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 8
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 0,
+        "y": 17
+      },
+      "id": 20,
+      "options": {
+        "dims": {
+          "x": "temp_c",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT temp_c, pace_min_km, name, date FROM runs WHERE temp_c IS NOT NULL AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY temp_c",
+          "rawSql": "SELECT temp_c, pace_min_km, name, date FROM runs WHERE temp_c IS NOT NULL AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY temp_c",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Temperature vs Pace",
+      "type": "xychart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Same pace, higher HR in heat",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 8
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 6,
+        "y": 17
+      },
+      "id": 21,
+      "options": {
+        "dims": {
+          "x": "temp_c",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT temp_c, avg_hr, name, date FROM runs WHERE temp_c IS NOT NULL AND avg_hr IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY temp_c",
+          "rawSql": "SELECT temp_c, avg_hr, name, date FROM runs WHERE temp_c IS NOT NULL AND avg_hr IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY temp_c",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Temperature vs HR",
+      "type": "xychart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "High humidity = slower runs",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 8
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 12,
+        "y": 17
+      },
+      "id": 22,
+      "options": {
+        "dims": {
+          "x": "humidity",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT humidity, pace_min_km, name, date FROM runs WHERE humidity IS NOT NULL AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY humidity",
+          "rawSql": "SELECT humidity, pace_min_km, name, date FROM runs WHERE humidity IS NOT NULL AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY humidity",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Humidity vs Pace",
+      "type": "xychart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "How do weather combinations affect your pace? Lower = faster",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Avg Pace (min/km)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5.5
+              },
+              {
+                "color": "orange",
+                "value": 6
+              },
+              {
+                "color": "red",
+                "value": 6.5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 18,
+        "y": 17
+      },
+      "id": 23,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT CASE WHEN temp_c >= 20 AND humidity >= 0.7 THEN 'Hot + Humid' WHEN temp_c >= 20 AND humidity < 0.7 THEN 'Hot + Dry' WHEN temp_c < 20 AND humidity >= 0.7 THEN 'Cool + Humid' ELSE 'Cool + Dry' END as conditions, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace, COUNT(*) as runs FROM runs WHERE temp_c IS NOT NULL AND humidity IS NOT NULL AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY conditions ORDER BY avg_pace DESC",
+          "rawSql": "SELECT CASE WHEN temp_c >= 20 AND humidity >= 0.7 THEN 'Hot + Humid' WHEN temp_c >= 20 AND humidity < 0.7 THEN 'Hot + Dry' WHEN temp_c < 20 AND humidity >= 0.7 THEN 'Cool + Humid' ELSE 'Cool + Dry' END as conditions, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace, COUNT(*) as runs FROM runs WHERE temp_c IS NOT NULL AND humidity IS NOT NULL AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY conditions ORDER BY avg_pace DESC",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Weather Impact: The Verdict",
+      "type": "barchart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "id": 103,
+      "panels": [],
+      "title": "Row 3: Did the Trail Just Suck?",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "More climbing = slower (but by how much?)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 8
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 28
+      },
+      "id": 30,
+      "options": {
+        "dims": {
+          "x": "elevation_gain",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT elevation_gain, pace_min_km, name, date FROM runs WHERE elevation_gain IS NOT NULL AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY elevation_gain",
+          "rawSql": "SELECT elevation_gain, pace_min_km, name, date FROM runs WHERE elevation_gain IS NOT NULL AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY elevation_gain",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Elevation Gain vs Pace",
+      "type": "xychart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Quantify the hill tax. Verdict: hills cost ~0.2 min/km \u2014 less than it feels!",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Avg Pace (min/km)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 4.5,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 28
+      },
+      "id": 31,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "auto",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT CASE WHEN elevation_gain < 50 THEN 'Flat (<50m)' WHEN elevation_gain < 100 THEN 'Rolling (50-100m)' ELSE 'Hilly (>100m)' END as terrain, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace FROM runs WHERE elevation_gain IS NOT NULL AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY CASE WHEN elevation_gain < 50 THEN 'Flat (<50m)' WHEN elevation_gain < 100 THEN 'Rolling (50-100m)' ELSE 'Hilly (>100m)' END ORDER BY 1",
+          "rawSql": "SELECT CASE WHEN elevation_gain < 50 THEN 'Flat (<50m)' WHEN elevation_gain < 100 THEN 'Rolling (50-100m)' ELSE 'Hilly (>100m)' END as terrain, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace FROM runs WHERE elevation_gain IS NOT NULL AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY CASE WHEN elevation_gain < 50 THEN 'Flat (<50m)' WHEN elevation_gain < 100 THEN 'Rolling (50-100m)' ELSE 'Hilly (>100m)' END ORDER BY 1",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Flat vs Hilly: The Hill Tax",
+      "type": "barchart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
+      "id": 104,
+      "panels": [],
+      "title": "Row 4: Was Sleep the Problem? (Spoiler: Weak Signal \u2014 see Row 7)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Sleep <70 = noticeable degradation?",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 8
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 0,
+        "y": 39
+      },
+      "id": 40,
+      "options": {
+        "dims": {
+          "x": "sleep_score",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT sleep_score, pace_min_km, name, date FROM run_with_sleep WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND sleep_score IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY sleep_score",
+          "rawSql": "SELECT sleep_score, pace_min_km, name, date FROM run_with_sleep WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND sleep_score IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY sleep_score",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Sleep Score vs Pace",
+      "type": "xychart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Low HRV = same pace feels harder",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 8
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 6,
+        "y": 39
+      },
+      "id": 41,
+      "options": {
+        "dims": {
+          "x": "hrv",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT hrv, relative_effort, name, date FROM run_with_sleep WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND hrv IS NOT NULL AND relative_effort IS NOT NULL ORDER BY hrv",
+          "rawSql": "SELECT hrv, relative_effort, name, date FROM run_with_sleep WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND hrv IS NOT NULL AND relative_effort IS NOT NULL ORDER BY hrv",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "HRV vs Relative Effort",
+      "type": "xychart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Trust the readiness score?",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 8
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 12,
+        "y": 39
+      },
+      "id": 42,
+      "options": {
+        "dims": {
+          "x": "readiness_score",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT readiness_score, pace_min_km, name, date FROM run_with_sleep WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND readiness_score IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY readiness_score",
+          "rawSql": "SELECT readiness_score, pace_min_km, name, date FROM run_with_sleep WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND readiness_score IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY readiness_score",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Readiness Score vs Pace",
+      "type": "xychart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Deep sleep = better recovery?",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 8
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 18,
+        "y": 39
+      },
+      "id": 43,
+      "options": {
+        "dims": {
+          "x": "deep_sleep_min",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT deep_sleep_min, pace_min_km, name, date FROM run_with_sleep WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND deep_sleep_min IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY deep_sleep_min",
+          "rawSql": "SELECT deep_sleep_min, pace_min_km, name, date FROM run_with_sleep WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND deep_sleep_min IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY deep_sleep_min",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Deep Sleep vs Pace",
+      "type": "xychart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 49
+      },
+      "id": 105,
+      "panels": [],
+      "title": "Row 5: The Big Picture",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Weekly mileage - tracking training volume",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Miles",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "lengthmi"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 50
+      },
+      "id": 50,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": -45,
+        "xTickLabelSpacing": 100
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT TO_CHAR(MIN(date), 'IYYY-\\\"W\\\"IW') as week, ROUND((SUM(distance_km) * 0.621371)::numeric, 1) as miles FROM runs WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY TO_CHAR(date, 'IYYY-IW') ORDER BY MIN(date)",
+          "rawSql": "SELECT TO_CHAR(MIN(date), 'IYYY-\\\"W\\\"IW') as week, ROUND((SUM(distance_km) * 0.621371)::numeric, 1) as miles FROM runs WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY TO_CHAR(date, 'IYYY-IW') ORDER BY MIN(date)",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Weekly Mileage",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Monthly average pace - getting faster or slower?",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Pace (min/km)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 5.0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 50
+      },
+      "id": 51,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": -45,
+        "xTickLabelSpacing": 100
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT TO_CHAR(MIN(date), 'YYYY-MM') as month, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY TO_CHAR(date, 'YYYY-MM') ORDER BY MIN(date)",
+          "rawSql": "SELECT TO_CHAR(MIN(date), 'YYYY-MM') as month, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY TO_CHAR(date, 'YYYY-MM') ORDER BY MIN(date)",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Monthly Pace Trend",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Top 5 fastest and slowest runs with conditions",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pace_min_km"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "date"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 60
+      },
+      "id": 52,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT * FROM (SELECT 'Fastest' as category, TO_CHAR(r.date, 'YYYY-MM-DD') as date, r.name, ROUND((r.pace_min_km)::numeric, 2) as pace_min_km, ROUND((r.distance_km)::numeric, 1) as distance_km, r.avg_hr, ROUND((r.temp_c)::numeric, 1) as temp_c, r.weather, MAX(s.sleep_score) as sleep_score, ROUND((r.elevation_gain)::numeric, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON r.date::DATE = s.date OR (r.date - INTERVAL '1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= $__timeFrom()::DATE AND r.date <= $__timeTo()::DATE GROUP BY r.id ORDER BY r.pace_min_km ASC LIMIT 5) UNION ALL SELECT * FROM (SELECT 'Slowest' as category, TO_CHAR(r.date, 'YYYY-MM-DD') as date, r.name, ROUND((r.pace_min_km)::numeric, 2) as pace_min_km, ROUND((r.distance_km)::numeric, 1) as distance_km, r.avg_hr, ROUND((r.temp_c)::numeric, 1) as temp_c, r.weather, MAX(s.sleep_score) as sleep_score, ROUND((r.elevation_gain)::numeric, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON r.date::DATE = s.date OR (r.date - INTERVAL '1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= $__timeFrom()::DATE AND r.date <= $__timeTo()::DATE GROUP BY r.id ORDER BY r.pace_min_km DESC LIMIT 5)",
+          "rawSql": "SELECT * FROM (SELECT 'Fastest' as category, TO_CHAR(r.date, 'YYYY-MM-DD') as date, r.name, ROUND((r.pace_min_km)::numeric, 2) as pace_min_km, ROUND((r.distance_km)::numeric, 1) as distance_km, r.avg_hr, ROUND((r.temp_c)::numeric, 1) as temp_c, r.weather, MAX(s.sleep_score) as sleep_score, ROUND((r.elevation_gain)::numeric, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON r.date::DATE = s.date OR (r.date - INTERVAL '1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= $__timeFrom()::DATE AND r.date <= $__timeTo()::DATE GROUP BY r.id ORDER BY r.pace_min_km ASC LIMIT 5) UNION ALL SELECT * FROM (SELECT 'Slowest' as category, TO_CHAR(r.date, 'YYYY-MM-DD') as date, r.name, ROUND((r.pace_min_km)::numeric, 2) as pace_min_km, ROUND((r.distance_km)::numeric, 1) as distance_km, r.avg_hr, ROUND((r.temp_c)::numeric, 1) as temp_c, r.weather, MAX(s.sleep_score) as sleep_score, ROUND((r.elevation_gain)::numeric, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON r.date::DATE = s.date OR (r.date - INTERVAL '1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= $__timeFrom()::DATE AND r.date <= $__timeTo()::DATE GROUP BY r.id ORDER BY r.pace_min_km DESC LIMIT 5)",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Best & Worst Runs",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 70
+      },
+      "id": 107,
+      "panels": [],
+      "title": "Row 6: Did I Fuel Properly?",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 71
+      },
+      "id": 70,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT COUNT(*) FROM runs WHERE gels_estimated IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "rawSql": "SELECT COUNT(*) FROM runs WHERE gels_estimated IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Long Runs (9+ mi)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "yellow",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 71
+      },
+      "id": 71,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT SUM(gels_estimated) FROM runs WHERE gels_estimated IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "rawSql": "SELECT SUM(gels_estimated) FROM runs WHERE gels_estimated IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Gels Consumed",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "massg"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 71
+      },
+      "id": 72,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT SUM(carbs_g) FROM runs WHERE carbs_g IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "rawSql": "SELECT SUM(carbs_g) FROM runs WHERE carbs_g IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Total Carbs (g)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Protocol: 1 gel (30g carbs) every 3 miles starting at mile 3",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 71
+      },
+      "id": 73,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT AVG(carbs_g * 4.0 / calories * 100) FROM runs WHERE carbs_g IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND calories > 0",
+          "rawSql": "SELECT AVG(carbs_g * 4.0 / calories * 100) FROM runs WHERE carbs_g IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND calories > 0",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Carb Replace %",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Carb intake vs calories burned on long runs",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 71
+      },
+      "id": 74,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT CAST(CAST(ROUND((distance_km * 0.621371)::numeric, 0) AS INTEGER) AS TEXT) as distance_mi, ROUND((AVG(carbs_g * 4))::numeric, 0) as carb_cals, ROUND((AVG(calories))::numeric, 0) as burned FROM runs WHERE gels_estimated IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND calories > 0 GROUP BY CAST(ROUND((distance_km * 0.621371)::numeric, 0) AS INTEGER) ORDER BY CAST(ROUND((distance_km * 0.621371)::numeric, 0) AS INTEGER)",
+          "rawSql": "SELECT CAST(CAST(ROUND((distance_km * 0.621371)::numeric, 0) AS INTEGER) AS TEXT) as distance_mi, ROUND((AVG(carbs_g * 4))::numeric, 0) as carb_cals, ROUND((AVG(calories))::numeric, 0) as burned FROM runs WHERE gels_estimated IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND calories > 0 GROUP BY CAST(ROUND((distance_km * 0.621371)::numeric, 0) AS INTEGER) ORDER BY CAST(ROUND((distance_km * 0.621371)::numeric, 0) AS INTEGER)",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Carbs vs Burned (by mi)",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "All long runs with fueling estimates",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 75
+      },
+      "id": 75,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT TO_CHAR(date, 'YYYY-MM-DD') as date, name, ROUND((distance_km * 0.621371)::numeric, 1) as miles, gels_estimated as gels, carbs_g as carbs, calories as burned, ROUND((carbs_g * 4.0 / calories * 100)::numeric, 1) as replace_pct, ROUND((pace_min_km)::numeric, 2) as pace FROM runs WHERE gels_estimated IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY date DESC",
+          "rawSql": "SELECT TO_CHAR(date, 'YYYY-MM-DD') as date, name, ROUND((distance_km * 0.621371)::numeric, 1) as miles, gels_estimated as gels, carbs_g as carbs, calories as burned, ROUND((carbs_g * 4.0 / calories * 100)::numeric, 1) as replace_pct, ROUND((pace_min_km)::numeric, 2) as pace FROM runs WHERE gels_estimated IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY date DESC",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Long Run Fueling Log",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Note: correlation driven by distance \u2014 longer runs need more gels and are paced slower.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 10
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 79
+      },
+      "id": 76,
+      "options": {
+        "dims": {
+          "x": "gels",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT gels_estimated as gels, pace_min_km as pace, name, date FROM runs WHERE gels_estimated IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY gels_estimated",
+          "rawSql": "SELECT gels_estimated as gels, pace_min_km as pace, name, date FROM runs WHERE gels_estimated IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY gels_estimated",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Gels vs Pace (Long Runs)",
+      "type": "xychart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 87
+      },
+      "id": 106,
+      "panels": [],
+      "title": "Row 7: Putting It All Together",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Average pace by condition quadrant: Cool (<15C) vs Warm, Good sleep (>75) vs Poor",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Avg Pace (min/km)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 5.0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5.5
+              },
+              {
+                "color": "red",
+                "value": 6.0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 0,
+        "y": 88
+      },
+      "id": 60,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT CASE WHEN temp_c < 15 AND sleep_score > 75 THEN 'Cool + Good Sleep' WHEN temp_c < 15 AND sleep_score <= 75 THEN 'Cool + Poor Sleep' WHEN temp_c >= 15 AND sleep_score > 75 THEN 'Warm + Good Sleep' ELSE 'Warm + Poor Sleep' END as conditions, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace FROM run_with_sleep WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND temp_c IS NOT NULL AND sleep_score IS NOT NULL AND pace_min_km IS NOT NULL GROUP BY conditions ORDER BY avg_pace",
+          "rawSql": "SELECT CASE WHEN temp_c < 15 AND sleep_score > 75 THEN 'Cool + Good Sleep' WHEN temp_c < 15 AND sleep_score <= 75 THEN 'Cool + Poor Sleep' WHEN temp_c >= 15 AND sleep_score > 75 THEN 'Warm + Good Sleep' ELSE 'Warm + Poor Sleep' END as conditions, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace FROM run_with_sleep WHERE date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND temp_c IS NOT NULL AND sleep_score IS NOT NULL AND pace_min_km IS NOT NULL GROUP BY conditions ORDER BY avg_pace",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Optimal Conditions",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Never run hard on Monday?",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Avg Pace (min/km)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 5.0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 8,
+        "y": 88
+      },
+      "id": 61,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "auto",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT day_of_week, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY day_of_week ORDER BY CASE day_of_week WHEN 'Monday' THEN 1 WHEN 'Tuesday' THEN 2 WHEN 'Wednesday' THEN 3 WHEN 'Thursday' THEN 4 WHEN 'Friday' THEN 5 WHEN 'Saturday' THEN 6 WHEN 'Sunday' THEN 7 END",
+          "rawSql": "SELECT day_of_week, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY day_of_week ORDER BY CASE day_of_week WHEN 'Monday' THEN 1 WHEN 'Tuesday' THEN 2 WHEN 'Wednesday' THEN 3 WHEN 'Thursday' THEN 4 WHEN 'Friday' THEN 5 WHEN 'Saturday' THEN 6 WHEN 'Sunday' THEN 7 END",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Pace by Day of Week",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Morning vs afternoon runner?",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Avg Pace (min/km)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 5.0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 16,
+        "y": 88
+      },
+      "id": 62,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "auto",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT CASE WHEN hour_of_day < 6 THEN 'Early (0-6)' WHEN hour_of_day < 12 THEN 'Morning (6-12)' WHEN hour_of_day < 18 THEN 'Afternoon (12-18)' ELSE 'Evening (18-24)' END as time_of_day, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY CASE WHEN hour_of_day < 6 THEN 'Early (0-6)' WHEN hour_of_day < 12 THEN 'Morning (6-12)' WHEN hour_of_day < 18 THEN 'Afternoon (12-18)' ELSE 'Evening (18-24)' END ORDER BY 1",
+          "rawSql": "SELECT CASE WHEN hour_of_day < 6 THEN 'Early (0-6)' WHEN hour_of_day < 12 THEN 'Morning (6-12)' WHEN hour_of_day < 18 THEN 'Afternoon (12-18)' ELSE 'Evening (18-24)' END as time_of_day, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY CASE WHEN hour_of_day < 6 THEN 'Early (0-6)' WHEN hour_of_day < 12 THEN 'Morning (6-12)' WHEN hour_of_day < 18 THEN 'Afternoon (12-18)' ELSE 'Evening (18-24)' END ORDER BY 1",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Pace by Time of Day",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Which factors have the biggest impact on your pace? Positive = faster when factor is favorable",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": true,
+            "axisColorMode": "text",
+            "axisLabel": "Pace Impact (sec/km faster)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 98
+      },
+      "id": 63,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT 'Cool Temp (<20C)' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM runs WHERE temp_c >= 20 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE temp_c < 20 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact UNION ALL SELECT 'Good Sleep (>75)' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE sleep_score <= 75 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE sleep_score > 75 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact UNION ALL SELECT 'Flat Route (<50m)' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM runs WHERE elevation_gain >= 50 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE elevation_gain < 50 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact UNION ALL SELECT 'Low Humidity (<70%)' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM runs WHERE humidity >= 70 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE humidity < 70 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact UNION ALL SELECT 'High HRV (>40)' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE hrv <= 40 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE hrv > 40 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact ORDER BY impact DESC",
+          "rawSql": "SELECT 'Cool Temp (<20C)' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM runs WHERE temp_c >= 20 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE temp_c < 20 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact UNION ALL SELECT 'Good Sleep (>75)' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE sleep_score <= 75 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE sleep_score > 75 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact UNION ALL SELECT 'Flat Route (<50m)' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM runs WHERE elevation_gain >= 50 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE elevation_gain < 50 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact UNION ALL SELECT 'Low Humidity (<70%)' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM runs WHERE humidity >= 70 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE humidity < 70 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact UNION ALL SELECT 'High HRV (>40)' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE hrv <= 40 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM run_with_sleep WHERE hrv > 40 AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact ORDER BY impact DESC",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "What Actually Matters (Pace Impact)",
+      "type": "barchart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 108
+      },
+      "id": 108,
+      "panels": [],
+      "title": "Row 8: Advanced Metrics (Garmin)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Monthly Easy Zone % trend - target is 80% (SLO line shown)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Easy Zone %",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 50
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 0,
+        "y": 109
+      },
+      "id": 80,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "vertical",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": -45,
+        "xTickLabelSpacing": 100
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT TO_CHAR(MIN(date), 'YYYY-MM') as month, ROUND((100.0 * SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0) + COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)))::numeric, 1) as easy_pct FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY TO_CHAR(date, 'YYYY-MM') ORDER BY MIN(date)",
+          "rawSql": "SELECT TO_CHAR(MIN(date), 'YYYY-MM') as month, ROUND((100.0 * SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0) + COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)))::numeric, 1) as easy_pct FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY TO_CHAR(date, 'YYYY-MM') ORDER BY MIN(date)",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "80/20 Trend",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Aerobic training effect over time (0-5 scale)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 8
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 6,
+        "y": 109
+      },
+      "id": 81,
+      "options": {
+        "dims": {
+          "x": "time",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT (EXTRACT(EPOCH FROM date)::BIGINT * 1000) as time, aerobic_te, name, date FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND aerobic_te IS NOT NULL ORDER BY date",
+          "rawSql": "SELECT (EXTRACT(EPOCH FROM date)::BIGINT * 1000) as time, aerobic_te, name, date FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND aerobic_te IS NOT NULL ORDER BY date",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Efficiency (ATE)",
+      "type": "xychart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "VO2max estimate over time - higher is better",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 8
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 12,
+        "y": 109
+      },
+      "id": 82,
+      "options": {
+        "dims": {
+          "x": "time",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT (EXTRACT(EPOCH FROM date)::BIGINT * 1000) as time, vo2max, name, date FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND vo2max IS NOT NULL ORDER BY date",
+          "rawSql": "SELECT (EXTRACT(EPOCH FROM date)::BIGINT * 1000) as time, vo2max, name, date FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE AND vo2max IS NOT NULL ORDER BY date",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "VO2max Trend",
+      "type": "xychart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Key running form metrics: ground contact time, stride length, vertical oscillation, and power output",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 18,
+        "y": 109
+      },
+      "id": 83,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT 'Ground Contact (ms)' as metric, ROUND((AVG(avg_ground_contact_time))::numeric, 0) as value FROM runs WHERE avg_ground_contact_time IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE UNION ALL SELECT 'Stride Length (cm)' as metric, ROUND((AVG(avg_stride_length))::numeric, 1) as value FROM runs WHERE avg_stride_length IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE UNION ALL SELECT 'Vertical Osc (cm)' as metric, ROUND((AVG(avg_vertical_oscillation))::numeric, 1) as value FROM runs WHERE avg_vertical_oscillation IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE UNION ALL SELECT 'Avg Power (W)' as metric, ROUND((AVG(avg_power))::numeric, 0) as value FROM runs WHERE avg_power IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "rawSql": "SELECT 'Ground Contact (ms)' as metric, ROUND((AVG(avg_ground_contact_time))::numeric, 0) as value FROM runs WHERE avg_ground_contact_time IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE UNION ALL SELECT 'Stride Length (cm)' as metric, ROUND((AVG(avg_stride_length))::numeric, 1) as value FROM runs WHERE avg_stride_length IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE UNION ALL SELECT 'Vertical Osc (cm)' as metric, ROUND((AVG(avg_vertical_oscillation))::numeric, 1) as value FROM runs WHERE avg_vertical_oscillation IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE UNION ALL SELECT 'Avg Power (W)' as metric, ROUND((AVG(avg_power))::numeric, 0) as value FROM runs WHERE avg_power IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Running Dynamics",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "How much energy each run drains from body battery",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointSize": {
+              "fixed": 8
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 0,
+        "y": 119
+      },
+      "id": 84,
+      "options": {
+        "dims": {
+          "x": "distance_km",
+          "exclude": [
+            "name",
+            "date"
+          ]
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "series": [],
+        "seriesMapping": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT distance_km, body_battery_change, name, date FROM runs WHERE body_battery_change IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY distance_km",
+          "rawSql": "SELECT distance_km, body_battery_change, name, date FROM runs WHERE body_battery_change IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY distance_km",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Resource Depletion Under Load",
+      "type": "xychart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Weekly training intensity distribution - how polarized is your training?",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Hours",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "easy_hrs"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Easy (Z1-2)"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "hard_hrs"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Hard (Z3-5)"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 8,
+        "y": 119
+      },
+      "id": 85,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "normal",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": -45,
+        "xTickLabelSpacing": 100
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT TO_CHAR(date, 'IYYY-IW') as week, SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / 3600.0 as easy_hrs, SUM(COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) / 3600.0 as hard_hrs FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY TO_CHAR(date, 'IYYY-IW') ORDER BY week",
+          "rawSql": "SELECT TO_CHAR(date, 'IYYY-IW') as week, SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / 3600.0 as easy_hrs, SUM(COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) / 3600.0 as hard_hrs FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY TO_CHAR(date, 'IYYY-IW') ORDER BY week",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Load Distribution by Zone",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Garmin run count with matched data",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 16,
+        "y": 119
+      },
+      "id": 86,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT COUNT(*) FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "rawSql": "SELECT COUNT(*) FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Total Logs",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Current VO2max estimate from Garmin",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 40
+              },
+              {
+                "color": "yellow",
+                "value": 45
+              },
+              {
+                "color": "green",
+                "value": 50
+              },
+              {
+                "color": "blue",
+                "value": 55
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 20,
+        "y": 119
+      },
+      "id": 87,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT vo2max FROM runs WHERE vo2max IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY date DESC LIMIT 1",
+          "rawSql": "SELECT vo2max FROM runs WHERE vo2max IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE ORDER BY date DESC LIMIT 1",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Max VO2max",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Average training load per run",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 16,
+        "y": 124
+      },
+      "id": 88,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT AVG(training_load) FROM runs WHERE training_load IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "rawSql": "SELECT AVG(training_load) FROM runs WHERE training_load IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Avg Load",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_POSTGRES}"
+      },
+      "description": "Percentage of running time in easy zones (should be 80%)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 50
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 20,
+        "y": 124
+      },
+      "id": 89,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT 100.0 * SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0) + COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "rawSql": "SELECT 100.0 * SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0) + COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) FROM runs WHERE garmin_id IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          }
+        }
+      ],
+      "title": "Easy Zone %",
+      "type": "stat"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 129
+      },
+      "id": 109,
+      "panels": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          },
+          "description": "Comparing January (no alcohol) vs other months - 3 years of Dry January data",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": true,
+                "axisColorMode": "text",
+                "axisLabel": "Pace Impact (sec/km faster)",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "yellow",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 130
+          },
+          "id": 110,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.6,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "always",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            },
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "rawQueryText": "SELECT 'Dry January' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM runs WHERE TO_CHAR(date, 'MM') != '01' AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE TO_CHAR(date, 'MM') = '01' AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact UNION ALL SELECT 'December Effect' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM runs WHERE TO_CHAR(date, 'MM') = '12' AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE TO_CHAR(date, 'MM') != '12' AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact",
+              "rawSql": "SELECT 'Dry January' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM runs WHERE TO_CHAR(date, 'MM') != '01' AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE TO_CHAR(date, 'MM') = '01' AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact UNION ALL SELECT 'December Effect' as factor, ROUND(((SELECT AVG(pace_min_km)*60 FROM runs WHERE TO_CHAR(date, 'MM') = '12' AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE TO_CHAR(date, 'MM') != '12' AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 1) as impact",
+              "refId": "A",
+              "format": "table",
+              "editorMode": "code",
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "${DS_POSTGRES}"
+              }
+            }
+          ],
+          "title": "Was It The Beer?",
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          },
+          "description": "Average pace by month - January highlighted",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Avg Pace (min/km)",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "min": 5.0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Jan"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "yellow",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 130
+          },
+          "id": 111,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.6,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            },
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "rawQueryText": "SELECT CASE TO_CHAR(date, 'MM') WHEN '01' THEN 'Jan' WHEN '02' THEN 'Feb' WHEN '03' THEN 'Mar' WHEN '04' THEN 'Apr' WHEN '05' THEN 'May' WHEN '06' THEN 'Jun' WHEN '07' THEN 'Jul' WHEN '08' THEN 'Aug' WHEN '09' THEN 'Sep' WHEN '10' THEN 'Oct' WHEN '11' THEN 'Nov' WHEN '12' THEN 'Dec' END as month, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY TO_CHAR(date, 'MM') ORDER BY TO_CHAR(date, 'MM')",
+              "rawSql": "SELECT CASE TO_CHAR(date, 'MM') WHEN '01' THEN 'Jan' WHEN '02' THEN 'Feb' WHEN '03' THEN 'Mar' WHEN '04' THEN 'Apr' WHEN '05' THEN 'May' WHEN '06' THEN 'Jun' WHEN '07' THEN 'Jul' WHEN '08' THEN 'Aug' WHEN '09' THEN 'Sep' WHEN '10' THEN 'Oct' WHEN '11' THEN 'Nov' WHEN '12' THEN 'Dec' END as month, ROUND((AVG(pace_min_km))::numeric, 2) as avg_pace FROM runs WHERE pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE GROUP BY TO_CHAR(date, 'MM') ORDER BY TO_CHAR(date, 'MM')",
+              "refId": "A",
+              "format": "table",
+              "editorMode": "code",
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "${DS_POSTGRES}"
+              }
+            }
+          ],
+          "title": "Pace by Month (January = Dry)",
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          },
+          "description": "Sleep quality comparison - does no alcohol improve sleep?",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Avg Sleep Score",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "purple",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "January (Dry)"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "yellow",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 130
+          },
+          "id": 112,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.6,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "always",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            },
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "rawQueryText": "SELECT 'January (Dry)' as period, ROUND((AVG(sleep_score))::numeric, 1) as avg_sleep FROM sleep WHERE TO_CHAR(date, 'MM') = '01' AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE UNION ALL SELECT 'Other Months' as period, ROUND((AVG(sleep_score))::numeric, 1) as avg_sleep FROM sleep WHERE TO_CHAR(date, 'MM') != '01' AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+              "rawSql": "SELECT 'January (Dry)' as period, ROUND((AVG(sleep_score))::numeric, 1) as avg_sleep FROM sleep WHERE TO_CHAR(date, 'MM') = '01' AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE UNION ALL SELECT 'Other Months' as period, ROUND((AVG(sleep_score))::numeric, 1) as avg_sleep FROM sleep WHERE TO_CHAR(date, 'MM') != '01' AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE",
+              "refId": "A",
+              "format": "table",
+              "editorMode": "code",
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "${DS_POSTGRES}"
+              }
+            }
+          ],
+          "title": "Sleep: Dry vs Wet Months",
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_POSTGRES}"
+          },
+          "description": "Pace improvement during dry months vs drinking months",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 0.3
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.5
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 138
+          },
+          "id": 113,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "rawQueryText": "SELECT ROUND((100.0 * ((SELECT AVG(pace_min_km) FROM runs WHERE TO_CHAR(date, 'MM') != '01' AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km) FROM runs WHERE TO_CHAR(date, 'MM') = '01' AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE)) / (SELECT AVG(pace_min_km) FROM runs WHERE pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 2) as pct",
+              "rawSql": "SELECT ROUND((100.0 * ((SELECT AVG(pace_min_km) FROM runs WHERE TO_CHAR(date, 'MM') != '01' AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE) - (SELECT AVG(pace_min_km) FROM runs WHERE TO_CHAR(date, 'MM') = '01' AND pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE)) / (SELECT AVG(pace_min_km) FROM runs WHERE pace_min_km IS NOT NULL AND date >= $__timeFrom()::DATE AND date <= $__timeTo()::DATE))::numeric, 2) as pct",
+              "refId": "A",
+              "format": "table",
+              "editorMode": "code",
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "${DS_POSTGRES}"
+              }
+            }
+          ],
+          "title": "\ud83c\udf7a Alcohol Impact %",
+          "type": "stat"
+        }
+      ],
+      "title": "\ud83c\udf7a Row 9: So... Was It The Beer?",
+      "type": "row"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "tags": [
+    "running",
+    "health",
+    "performance"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-5y",
+    "to": "now"
+  },
+  "timepicker": {
+    "quick_ranges": [
+      {
+        "display": "2026",
+        "from": "2026-01-01T00:00:00.000Z",
+        "to": "2026-12-31T23:59:59.000Z"
+      },
+      {
+        "display": "2025",
+        "from": "2025-01-01T00:00:00.000Z",
+        "to": "2025-12-31T23:59:59.000Z"
+      },
+      {
+        "display": "2024",
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-12-31T23:59:59.000Z"
+      },
+      {
+        "display": "2023",
+        "from": "2023-01-01T00:00:00.000Z",
+        "to": "2023-12-31T23:59:59.000Z"
+      },
+      {
+        "display": "Last 6 months",
+        "from": "now-6M",
+        "to": "now"
+      },
+      {
+        "display": "Last 1 year",
+        "from": "now-1y",
+        "to": "now"
+      },
+      {
+        "display": "All time",
+        "from": "now-5y",
+        "to": "now"
+      }
+    ]
+  },
+  "timezone": "browser",
+  "title": "Running Dashboard - Debug Your Body (PostgreSQL)",
+  "uid": "running-debug-pg4",
+  "version": 1,
+  "weekStart": ""
+}
