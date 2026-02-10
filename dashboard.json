@@ -17,6 +17,57 @@
       "type": "row"
     },
     {
+      "datasource": { "type": "datasource", "uid": "-- Dashboard --" },
+      "gridPos": { "h": 3, "w": 18, "x": 0, "y": 1 },
+      "id": 114,
+      "options": {
+        "code": { "language": "plaintext", "showLineNumbers": false, "showMiniMap": false },
+        "content": "### 🏃 Debug Your Body\n\nThis dashboard treats the human body like a production system. Each row eliminates a variable — **effort, weather, terrain, sleep, fueling** — until you find the root cause of a bad run. It's the same troubleshooting methodology used on production systems, applied to the only system you can't replace.\n\n**Data sources:** Strava (routes, pace) • Garmin (HR zones, VO2max, running dynamics) • Oura (sleep, HRV, readiness)",
+        "mode": "markdown"
+      },
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
+      "description": "⚠️ SLO VIOLATION - Target is 80% easy runs",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red", "value": null },
+            { "color": "orange", "value": 50 },
+            { "color": "yellow", "value": 70 },
+            { "color": "green", "value": 80 }
+          ]},
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 3, "w": 6, "x": 18, "y": 1 },
+      "id": 115,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "rawQueryText": "SELECT 100.0 * SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0) + COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')",
+          "rawSql": "SELECT 100.0 * SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0)) / SUM(COALESCE(hr_zone_1_sec, 0) + COALESCE(hr_zone_2_sec, 0) + COALESCE(hr_zone_3_sec, 0) + COALESCE(hr_zone_4_sec, 0) + COALESCE(hr_zone_5_sec, 0)) FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')",
+          "refId": "A"
+        }
+      ],
+      "title": "🚨 Easy Zone % (SLO: 80%)",
+      "type": "stat"
+    },
+    {
       "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
       "fieldConfig": {
         "defaults": {
@@ -27,7 +78,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 4 },
       "id": 1,
       "options": {
         "colorMode": "value",
@@ -59,7 +110,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 4 },
       "id": 2,
       "options": {
         "colorMode": "value",
@@ -91,7 +142,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 4 },
       "id": 4,
       "options": {
         "colorMode": "value",
@@ -123,7 +174,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 4 },
       "id": 5,
       "options": {
         "colorMode": "value",
@@ -500,7 +551,7 @@
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 38 },
       "id": 104,
       "panels": [],
-      "title": "Row 4: Was Sleep the Problem?",
+      "title": "Row 4: Was Sleep the Problem? (Spoiler: Weak Signal — see Row 7)",
       "type": "row"
     },
     {
@@ -993,8 +1044,8 @@
       },
       "targets": [
         {
-          "rawQueryText": "SELECT date, name, ROUND(distance_km * 0.621371, 1) as miles, gels_estimated as gels, carbs_g as carbs, calories as burned, ROUND(carbs_g * 4.0 / calories * 100, 1) as replace_pct, ROUND(pace_min_km, 2) as pace FROM runs WHERE gels_estimated IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY date DESC",
-          "rawSql": "SELECT date, name, ROUND(distance_km * 0.621371, 1) as miles, gels_estimated as gels, carbs_g as carbs, calories as burned, ROUND(carbs_g * 4.0 / calories * 100, 1) as replace_pct, ROUND(pace_min_km, 2) as pace FROM runs WHERE gels_estimated IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY date DESC",
+          "rawQueryText": "SELECT strftime('%Y-%m-%d', date) as date, name, ROUND(distance_km * 0.621371, 1) as miles, gels_estimated as gels, carbs_g as carbs, calories as burned, ROUND(carbs_g * 4.0 / calories * 100, 1) as replace_pct, ROUND(pace_min_km, 2) as pace FROM runs WHERE gels_estimated IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY date DESC",
+          "rawSql": "SELECT strftime('%Y-%m-%d', date) as date, name, ROUND(distance_km * 0.621371, 1) as miles, gels_estimated as gels, carbs_g as carbs, calories as burned, ROUND(carbs_g * 4.0 / calories * 100, 1) as replace_pct, ROUND(pace_min_km, 2) as pace FROM runs WHERE gels_estimated IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY date DESC",
           "refId": "A"
         }
       ],
