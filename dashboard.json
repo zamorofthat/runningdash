@@ -18,7 +18,7 @@
     },
     {
       "datasource": { "type": "datasource", "uid": "-- Dashboard --" },
-      "gridPos": { "h": 3, "w": 18, "x": 0, "y": 1 },
+      "gridPos": { "h": 4, "w": 18, "x": 0, "y": 1 },
       "id": 114,
       "options": {
         "code": { "language": "plaintext", "showLineNumbers": false, "showMiniMap": false },
@@ -47,7 +47,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 3, "w": 6, "x": 18, "y": 1 },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
       "id": 115,
       "options": {
         "colorMode": "background",
@@ -64,7 +64,7 @@
           "refId": "A"
         }
       ],
-      "title": "🚨 Easy Zone % (SLO: 80%)",
+      "title": "Easy% (SLO: 80%)",
       "type": "stat"
     },
     {
@@ -78,7 +78,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 4 },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 5 },
       "id": 1,
       "options": {
         "colorMode": "value",
@@ -262,7 +262,7 @@
       "gridPos": { "h": 10, "w": 8, "x": 8, "y": 6 },
       "id": 11,
       "options": {
-        "dims": { "x": "day_num", "exclude": ["name", "date"] },
+        "dims": { "x": "time", "exclude": ["name", "date"] },
         "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
         "series": [],
         "seriesMapping": "auto",
@@ -270,8 +270,8 @@
       },
       "targets": [
         {
-          "rawQueryText": "SELECT julianday(date) - julianday(date((SELECT MIN(date) FROM runs WHERE date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')))) as day_num, relative_effort, name, date FROM runs WHERE relative_effort IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY date",
-          "rawSql": "SELECT julianday(date) - julianday(date((SELECT MIN(date) FROM runs WHERE date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')))) as day_num, relative_effort, name, date FROM runs WHERE relative_effort IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY date",
+          "rawQueryText": "SELECT strftime('%s', date) * 1000 as time, relative_effort, name, date FROM runs WHERE relative_effort IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY date",
+          "rawSql": "SELECT strftime('%s', date) * 1000 as time, relative_effort, name, date FROM runs WHERE relative_effort IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY date",
           "refId": "A"
         }
       ],
@@ -519,7 +519,7 @@
     },
     {
       "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
-      "description": "Quantify the hill tax",
+      "description": "Quantify the hill tax. Verdict: hills cost ~0.2 min/km — less than it feels!",
       "fieldConfig": {
         "defaults": {
           "color": { "fixedColor": "blue", "mode": "fixed" },
@@ -537,6 +537,7 @@
             "thresholdsStyle": { "mode": "off" }
           },
           "mappings": [],
+          "min": 4.5,
           "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
         },
         "overrides": []
@@ -786,6 +787,7 @@
             "thresholdsStyle": { "mode": "off" }
           },
           "mappings": [],
+          "min": 5.0,
           "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
         },
         "overrides": []
@@ -831,11 +833,15 @@
         "overrides": [
           {
             "matcher": { "id": "byName", "options": "pace_min_km" },
-            "properties": [{ "id": "custom.width", "value": 100 }]
+            "properties": [{ "id": "custom.width", "value": 80 }]
           },
           {
             "matcher": { "id": "byName", "options": "date" },
-            "properties": [{ "id": "custom.width", "value": 100 }]
+            "properties": [{ "id": "custom.width", "value": 90 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "name" },
+            "properties": [{ "id": "custom.width", "value": 200 }]
           }
         ]
       },
@@ -848,8 +854,8 @@
       },
       "targets": [
         {
-          "rawQueryText": "SELECT * FROM (SELECT 'Fastest' as category, r.date, r.name, ROUND(r.pace_min_km, 2) as pace_min_km, ROUND(r.distance_km, 1) as distance_km, r.avg_hr, ROUND(r.temp_c, 1) as temp_c, r.weather, s.sleep_score, ROUND(r.elevation_gain, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON date(r.date) = s.date OR date(r.date, '-1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= date($__from/1000, 'unixepoch') AND r.date <= date($__to/1000, 'unixepoch') ORDER BY r.pace_min_km ASC LIMIT 5) UNION ALL SELECT * FROM (SELECT 'Slowest' as category, r.date, r.name, ROUND(r.pace_min_km, 2) as pace_min_km, ROUND(r.distance_km, 1) as distance_km, r.avg_hr, ROUND(r.temp_c, 1) as temp_c, r.weather, s.sleep_score, ROUND(r.elevation_gain, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON date(r.date) = s.date OR date(r.date, '-1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= date($__from/1000, 'unixepoch') AND r.date <= date($__to/1000, 'unixepoch') ORDER BY r.pace_min_km DESC LIMIT 5)",
-          "rawSql": "SELECT * FROM (SELECT 'Fastest' as category, r.date, r.name, ROUND(r.pace_min_km, 2) as pace_min_km, ROUND(r.distance_km, 1) as distance_km, r.avg_hr, ROUND(r.temp_c, 1) as temp_c, r.weather, s.sleep_score, ROUND(r.elevation_gain, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON date(r.date) = s.date OR date(r.date, '-1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= date($__from/1000, 'unixepoch') AND r.date <= date($__to/1000, 'unixepoch') ORDER BY r.pace_min_km ASC LIMIT 5) UNION ALL SELECT * FROM (SELECT 'Slowest' as category, r.date, r.name, ROUND(r.pace_min_km, 2) as pace_min_km, ROUND(r.distance_km, 1) as distance_km, r.avg_hr, ROUND(r.temp_c, 1) as temp_c, r.weather, s.sleep_score, ROUND(r.elevation_gain, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON date(r.date) = s.date OR date(r.date, '-1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= date($__from/1000, 'unixepoch') AND r.date <= date($__to/1000, 'unixepoch') ORDER BY r.pace_min_km DESC LIMIT 5)",
+          "rawQueryText": "SELECT * FROM (SELECT 'Fastest' as category, strftime('%Y-%m-%d', r.date) as date, r.name, ROUND(r.pace_min_km, 2) as pace_min_km, ROUND(r.distance_km, 1) as distance_km, r.avg_hr, ROUND(r.temp_c, 1) as temp_c, r.weather, MAX(s.sleep_score) as sleep_score, ROUND(r.elevation_gain, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON date(r.date) = s.date OR date(r.date, '-1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= date($__from/1000, 'unixepoch') AND r.date <= date($__to/1000, 'unixepoch') GROUP BY r.id ORDER BY r.pace_min_km ASC LIMIT 5) UNION ALL SELECT * FROM (SELECT 'Slowest' as category, strftime('%Y-%m-%d', r.date) as date, r.name, ROUND(r.pace_min_km, 2) as pace_min_km, ROUND(r.distance_km, 1) as distance_km, r.avg_hr, ROUND(r.temp_c, 1) as temp_c, r.weather, MAX(s.sleep_score) as sleep_score, ROUND(r.elevation_gain, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON date(r.date) = s.date OR date(r.date, '-1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= date($__from/1000, 'unixepoch') AND r.date <= date($__to/1000, 'unixepoch') GROUP BY r.id ORDER BY r.pace_min_km DESC LIMIT 5)",
+          "rawSql": "SELECT * FROM (SELECT 'Fastest' as category, strftime('%Y-%m-%d', r.date) as date, r.name, ROUND(r.pace_min_km, 2) as pace_min_km, ROUND(r.distance_km, 1) as distance_km, r.avg_hr, ROUND(r.temp_c, 1) as temp_c, r.weather, MAX(s.sleep_score) as sleep_score, ROUND(r.elevation_gain, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON date(r.date) = s.date OR date(r.date, '-1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= date($__from/1000, 'unixepoch') AND r.date <= date($__to/1000, 'unixepoch') GROUP BY r.id ORDER BY r.pace_min_km ASC LIMIT 5) UNION ALL SELECT * FROM (SELECT 'Slowest' as category, strftime('%Y-%m-%d', r.date) as date, r.name, ROUND(r.pace_min_km, 2) as pace_min_km, ROUND(r.distance_km, 1) as distance_km, r.avg_hr, ROUND(r.temp_c, 1) as temp_c, r.weather, MAX(s.sleep_score) as sleep_score, ROUND(r.elevation_gain, 0) as elevation_gain FROM runs r LEFT JOIN sleep s ON date(r.date) = s.date OR date(r.date, '-1 day') = s.date WHERE r.pace_min_km IS NOT NULL AND r.distance_km > 3 AND r.date >= date($__from/1000, 'unixepoch') AND r.date <= date($__to/1000, 'unixepoch') GROUP BY r.id ORDER BY r.pace_min_km DESC LIMIT 5)",
           "refId": "A"
         }
       ],
@@ -923,7 +929,7 @@
           "refId": "A"
         }
       ],
-      "title": "Total Gels Consumed",
+      "title": "Gels Consumed",
       "type": "stat"
     },
     {
@@ -954,7 +960,7 @@
           "refId": "A"
         }
       ],
-      "title": "Total Carbs Consumed",
+      "title": "Total Carbs (g)",
       "type": "stat"
     },
     {
@@ -987,7 +993,7 @@
           "refId": "A"
         }
       ],
-      "title": "Avg Carb Replacement %",
+      "title": "Carb Replace %",
       "type": "stat"
     },
     {
@@ -1030,12 +1036,12 @@
       },
       "targets": [
         {
-          "rawQueryText": "SELECT CAST(ROUND(distance_km * 0.621371, 0) AS TEXT) || ' mi' as distance, ROUND(AVG(carbs_g * 4), 0) as carb_cals, ROUND(AVG(calories), 0) as burned FROM runs WHERE gels_estimated IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND calories > 0 GROUP BY ROUND(distance_km * 0.621371, 0) ORDER BY ROUND(distance_km * 0.621371, 0)",
-          "rawSql": "SELECT CAST(ROUND(distance_km * 0.621371, 0) AS TEXT) || ' mi' as distance, ROUND(AVG(carbs_g * 4), 0) as carb_cals, ROUND(AVG(calories), 0) as burned FROM runs WHERE gels_estimated IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND calories > 0 GROUP BY ROUND(distance_km * 0.621371, 0) ORDER BY ROUND(distance_km * 0.621371, 0)",
+          "rawQueryText": "SELECT CAST(CAST(ROUND(distance_km * 0.621371, 0) AS INTEGER) AS TEXT) as distance_mi, ROUND(AVG(carbs_g * 4), 0) as carb_cals, ROUND(AVG(calories), 0) as burned FROM runs WHERE gels_estimated IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND calories > 0 GROUP BY CAST(ROUND(distance_km * 0.621371, 0) AS INTEGER) ORDER BY CAST(ROUND(distance_km * 0.621371, 0) AS INTEGER)",
+          "rawSql": "SELECT CAST(CAST(ROUND(distance_km * 0.621371, 0) AS INTEGER) AS TEXT) as distance_mi, ROUND(AVG(carbs_g * 4), 0) as carb_cals, ROUND(AVG(calories), 0) as burned FROM runs WHERE gels_estimated IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND calories > 0 GROUP BY CAST(ROUND(distance_km * 0.621371, 0) AS INTEGER) ORDER BY CAST(ROUND(distance_km * 0.621371, 0) AS INTEGER)",
           "refId": "A"
         }
       ],
-      "title": "Carb Calories vs Total Burned",
+      "title": "Carbs vs Burned (by mi)",
       "type": "barchart"
     },
     {
@@ -1073,7 +1079,7 @@
     },
     {
       "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
-      "description": "Does better fueling correlate with faster back-half paces?",
+      "description": "Note: correlation driven by distance — longer runs need more gels and are paced slower.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -1115,37 +1121,56 @@
     },
     {
       "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
-      "description": "Find your ideal running conditions by sleep and temperature",
+      "description": "Average pace by condition quadrant: Cool (<15C) vs Warm, Good sleep (>75) vs Poor",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "mode": "thresholds" },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Avg Pace (min/km)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
-            "pointSize": { "fixed": 8 },
-            "scaleDistribution": { "type": "linear" }
+            "lineWidth": 1,
+            "scaleDistribution": { "type": "linear" },
+            "thresholdsStyle": { "mode": "off" }
           },
-          "mappings": []
+          "mappings": [],
+          "min": 5.0,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 5.5 },
+            { "color": "red", "value": 6.0 }
+          ]}
         },
         "overrides": []
       },
       "gridPos": { "h": 10, "w": 8, "x": 0, "y": 88 },
       "id": 60,
       "options": {
-        "dims": { "x": "temp_c", "exclude": ["name", "date"] },
-        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
-        "series": [],
-        "seriesMapping": "auto",
-        "tooltip": { "mode": "single" }
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
       },
       "targets": [
         {
-          "rawQueryText": "SELECT temp_c, sleep_score, pace_min_km, name, date FROM run_with_sleep WHERE date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND temp_c IS NOT NULL AND sleep_score IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY temp_c",
-          "rawSql": "SELECT temp_c, sleep_score, pace_min_km, name, date FROM run_with_sleep WHERE date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND temp_c IS NOT NULL AND sleep_score IS NOT NULL AND pace_min_km IS NOT NULL ORDER BY temp_c",
+          "rawQueryText": "SELECT CASE WHEN temp_c < 15 AND sleep_score > 75 THEN 'Cool + Good Sleep' WHEN temp_c < 15 AND sleep_score <= 75 THEN 'Cool + Poor Sleep' WHEN temp_c >= 15 AND sleep_score > 75 THEN 'Warm + Good Sleep' ELSE 'Warm + Poor Sleep' END as conditions, ROUND(AVG(pace_min_km), 2) as avg_pace FROM run_with_sleep WHERE date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND temp_c IS NOT NULL AND sleep_score IS NOT NULL AND pace_min_km IS NOT NULL GROUP BY conditions ORDER BY avg_pace",
+          "rawSql": "SELECT CASE WHEN temp_c < 15 AND sleep_score > 75 THEN 'Cool + Good Sleep' WHEN temp_c < 15 AND sleep_score <= 75 THEN 'Cool + Poor Sleep' WHEN temp_c >= 15 AND sleep_score > 75 THEN 'Warm + Good Sleep' ELSE 'Warm + Poor Sleep' END as conditions, ROUND(AVG(pace_min_km), 2) as avg_pace FROM run_with_sleep WHERE date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND temp_c IS NOT NULL AND sleep_score IS NOT NULL AND pace_min_km IS NOT NULL GROUP BY conditions ORDER BY avg_pace",
           "refId": "A"
         }
       ],
-      "title": "Optimal Conditions (Temp x Sleep)",
-      "type": "xychart"
+      "title": "Optimal Conditions",
+      "type": "barchart"
     },
     {
       "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
@@ -1167,6 +1192,7 @@
             "thresholdsStyle": { "mode": "off" }
           },
           "mappings": [],
+          "min": 5.0,
           "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
         },
         "overrides": []
@@ -1215,6 +1241,7 @@
             "thresholdsStyle": { "mode": "off" }
           },
           "mappings": [],
+          "min": 5.0,
           "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
         },
         "overrides": []
@@ -1268,7 +1295,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 98 },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 98 },
       "id": 63,
       "options": {
         "barRadius": 0,
@@ -1353,7 +1380,7 @@
           "refId": "A"
         }
       ],
-      "title": "80/20 Trend (Easy Zone %)",
+      "title": "80/20 Trend",
       "type": "barchart"
     },
     {
@@ -1374,7 +1401,7 @@
       "gridPos": { "h": 10, "w": 6, "x": 6, "y": 109 },
       "id": 81,
       "options": {
-        "dims": { "x": "day_num", "exclude": ["name", "date"] },
+        "dims": { "x": "time", "exclude": ["name", "date"] },
         "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
         "series": [],
         "seriesMapping": "auto",
@@ -1382,12 +1409,12 @@
       },
       "targets": [
         {
-          "rawQueryText": "SELECT julianday(date) - julianday((SELECT MIN(date) FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch'))) as day_num, aerobic_te, name, date FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND aerobic_te IS NOT NULL ORDER BY date",
-          "rawSql": "SELECT julianday(date) - julianday((SELECT MIN(date) FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch'))) as day_num, aerobic_te, name, date FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND aerobic_te IS NOT NULL ORDER BY date",
+          "rawQueryText": "SELECT strftime('%s', date) * 1000 as time, aerobic_te, name, date FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND aerobic_te IS NOT NULL ORDER BY date",
+          "rawSql": "SELECT strftime('%s', date) * 1000 as time, aerobic_te, name, date FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND aerobic_te IS NOT NULL ORDER BY date",
           "refId": "A"
         }
       ],
-      "title": "Processing Efficiency Score",
+      "title": "Efficiency (ATE)",
       "type": "xychart"
     },
     {
@@ -1408,7 +1435,7 @@
       "gridPos": { "h": 10, "w": 6, "x": 12, "y": 109 },
       "id": 82,
       "options": {
-        "dims": { "x": "day_num", "exclude": ["name", "date"] },
+        "dims": { "x": "time", "exclude": ["name", "date"] },
         "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
         "series": [],
         "seriesMapping": "auto",
@@ -1416,17 +1443,17 @@
       },
       "targets": [
         {
-          "rawQueryText": "SELECT julianday(date) - julianday((SELECT MIN(date) FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch'))) as day_num, vo2max, name, date FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND vo2max IS NOT NULL ORDER BY date",
-          "rawSql": "SELECT julianday(date) - julianday((SELECT MIN(date) FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch'))) as day_num, vo2max, name, date FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND vo2max IS NOT NULL ORDER BY date",
+          "rawQueryText": "SELECT strftime('%s', date) * 1000 as time, vo2max, name, date FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND vo2max IS NOT NULL ORDER BY date",
+          "rawSql": "SELECT strftime('%s', date) * 1000 as time, vo2max, name, date FROM runs WHERE garmin_id IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') AND vo2max IS NOT NULL ORDER BY date",
           "refId": "A"
         }
       ],
-      "title": "System Capacity Trend (VO2max)",
+      "title": "VO2max Trend",
       "type": "xychart"
     },
     {
       "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
-      "description": "Average running dynamics metrics from Garmin",
+      "description": "Key running form metrics: ground contact time, stride length, vertical oscillation, and power output",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -1469,7 +1496,7 @@
           "refId": "A"
         }
       ],
-      "title": "Runtime Performance Metrics",
+      "title": "Running Dynamics",
       "type": "barchart"
     },
     {
@@ -1598,7 +1625,7 @@
           "refId": "A"
         }
       ],
-      "title": "Total System Logs",
+      "title": "Total Logs",
       "type": "stat"
     },
     {
@@ -1637,7 +1664,7 @@
           "refId": "A"
         }
       ],
-      "title": "Max System Capacity",
+      "title": "Max VO2max",
       "type": "stat"
     },
     {
@@ -1670,7 +1697,7 @@
           "refId": "A"
         }
       ],
-      "title": "Avg System Load",
+      "title": "Avg Load",
       "type": "stat"
     },
     {
@@ -1708,7 +1735,7 @@
           "refId": "A"
         }
       ],
-      "title": "Easy Zone % (SLO: 80%)",
+      "title": "Easy Zone %",
       "type": "stat"
     },
     {
@@ -1757,8 +1784,8 @@
           },
           "targets": [
             {
-              "rawQueryText": "SELECT 'Dry January Effect' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) != '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) = '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact",
-              "rawSql": "SELECT 'Dry January Effect' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) != '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) = '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact",
+              "rawQueryText": "SELECT 'Dry January' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) != '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) = '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact UNION ALL SELECT 'December Effect' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) = '12' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) != '12' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact",
+              "rawSql": "SELECT 'Dry January' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) != '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) = '01' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact UNION ALL SELECT 'December Effect' as factor, ROUND((SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) = '12' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')) - (SELECT AVG(pace_min_km)*60 FROM runs WHERE strftime('%m', date) != '12' AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch')), 1) as impact",
               "refId": "A"
             }
           ],
@@ -1785,6 +1812,7 @@
                 "thresholdsStyle": { "mode": "off" }
               },
               "mappings": [],
+              "min": 5.0,
               "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
             },
             "overrides": [
@@ -1873,7 +1901,7 @@
         },
         {
           "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
-          "description": "Performance cost of alcohol - January (dry) vs other months",
+          "description": "Pace improvement during dry months vs drinking months",
           "fieldConfig": {
             "defaults": {
               "color": { "mode": "thresholds" },

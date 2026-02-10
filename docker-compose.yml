@@ -7,7 +7,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=cribldemo1234
+      - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_INSTALL_PLUGINS=frser-sqlite-datasource
     volumes:
       - ./running_dashboard.db:/var/lib/grafana/running_dashboard.db:ro

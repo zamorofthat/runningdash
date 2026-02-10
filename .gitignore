@@ -1,0 +1,25 @@
+# Database (contains personal data)
+*.db
+
+# Local/personal files
+.local/
+notes.md
+SESSION_NOTES.md
+GOLDEN_GROT_CHANGES.md
+DASHBOARD_PREVIEW.md
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Data exports (user should provide their own)
+runningdata/
+*.csv
