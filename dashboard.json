@@ -424,37 +424,56 @@
     },
     {
       "datasource": { "type": "frser-sqlite-datasource", "uid": "sqlite" },
-      "description": "Find the sweet spot zone for optimal running conditions (color = pace)",
+      "description": "How do weather combinations affect your pace? Lower = faster",
       "fieldConfig": {
         "defaults": {
-          "color": { "fixedColor": "orange", "mode": "fixed" },
+          "color": { "mode": "thresholds" },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Avg Pace (min/km)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
-            "pointSize": { "fixed": 8 },
-            "scaleDistribution": { "type": "linear" }
+            "lineWidth": 1,
+            "scaleDistribution": { "type": "linear" },
+            "thresholdsStyle": { "mode": "off" }
           },
-          "mappings": []
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 5.5 },
+            { "color": "orange", "value": 6 },
+            { "color": "red", "value": 6.5 }
+          ]}
         },
         "overrides": []
       },
       "gridPos": { "h": 10, "w": 6, "x": 18, "y": 17 },
       "id": 23,
       "options": {
-        "dims": { "x": "temp_c", "exclude": ["name", "date"] },
-        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
-        "series": [],
-        "seriesMapping": "auto",
-        "tooltip": { "mode": "single" }
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
       },
       "targets": [
         {
-          "rawQueryText": "SELECT temp_c, humidity, pace_min_km, name, date FROM runs WHERE temp_c IS NOT NULL AND humidity IS NOT NULL AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY temp_c",
-          "rawSql": "SELECT temp_c, humidity, pace_min_km, name, date FROM runs WHERE temp_c IS NOT NULL AND humidity IS NOT NULL AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') ORDER BY temp_c",
+          "rawQueryText": "SELECT CASE WHEN temp_c >= 20 AND humidity >= 0.7 THEN 'Hot + Humid' WHEN temp_c >= 20 AND humidity < 0.7 THEN 'Hot + Dry' WHEN temp_c < 20 AND humidity >= 0.7 THEN 'Cool + Humid' ELSE 'Cool + Dry' END as conditions, ROUND(AVG(pace_min_km), 2) as avg_pace, COUNT(*) as runs FROM runs WHERE temp_c IS NOT NULL AND humidity IS NOT NULL AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') GROUP BY conditions ORDER BY avg_pace DESC",
+          "rawSql": "SELECT CASE WHEN temp_c >= 20 AND humidity >= 0.7 THEN 'Hot + Humid' WHEN temp_c >= 20 AND humidity < 0.7 THEN 'Hot + Dry' WHEN temp_c < 20 AND humidity >= 0.7 THEN 'Cool + Humid' ELSE 'Cool + Dry' END as conditions, ROUND(AVG(pace_min_km), 2) as avg_pace, COUNT(*) as runs FROM runs WHERE temp_c IS NOT NULL AND humidity IS NOT NULL AND pace_min_km IS NOT NULL AND date >= date($__from/1000, 'unixepoch') AND date <= date($__to/1000, 'unixepoch') GROUP BY conditions ORDER BY avg_pace DESC",
           "refId": "A"
         }
       ],
-      "title": "Weather: Temp vs Humidity",
-      "type": "xychart"
+      "title": "Weather Impact: The Verdict",
+      "type": "barchart"
     },
     {
       "collapsed": false,
