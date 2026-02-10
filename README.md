@@ -47,7 +47,7 @@ grafana-cli plugins install frser-sqlite-datasource
 Add a new SQLite datasource:
 - **Name:** sqlite
 - **UID:** sqlite
-- **Path:** `/Users/azamora/Projects/runningdash/running_dashboard.db`
+- **Path:** `/var/lib/grafana/running_dashboard.db` (or your local path)
 
 ### 3. Import Dashboard
 
